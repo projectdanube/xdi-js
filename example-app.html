@@ -1,0 +1,26 @@
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.6.4.min.js"></script>
+<script type="text/javascript" src="xdi.js"></script>
+<script type="text/javascript">
+function c() {
+
+	var g = xdi.graph();
+	g.root().context("=markus").context("$!(+email)").literal("markus.sabadello@gmail.com");
+	g.root().context("=markus").relation("+friend", "=joe");
+	g.root().context("=markus").relation("+friend", "=drummond");
+	g.root().context("=markus").context("+first").context("$!(+name)").literal("Markus");
+	g.statement(xdi.statement("=markus$!(+(+email/+test)+(email))/!/(data:,xxx)"));
+	
+	var statements = g.statements();
+	for (i in statements) $("#result").append("<p>" + statements[i].string + "</p>");
+
+}
+</script>
+</head>
+<body>
+<button onclick="c();">Click here</button>
+<p>Result:</p>
+<div id="result"></div>
+</body>
+</html>
