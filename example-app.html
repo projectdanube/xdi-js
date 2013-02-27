@@ -6,11 +6,11 @@
 function c() {
 
 	var g = xdi.graph();
-	g.root().context("=markus").context("$!(+email)").literal("markus.sabadello@gmail.com");
+/*	g.root().context("=markus").context("$!(+email)").literal("markus.sabadello@gmail.com");
 	g.root().context("=markus").relation("+friend", "=joe");
 	g.root().context("=markus").relation("+friend", "=drummond");
-	g.root().context("=markus").context("+first").context("$!(+name)").literal("Markus");
-	g.statement(xdi.statement("=markus$!(+(+email/+test)+(email))/!/(data:,xxx)"));
+	g.root().context("=markus").context("+first").context("$!(+name)").literal("Markus");*/
+	g.statement("=markus$!(+(+email/+test)+(email))/!/(data:,xxx)");
 	
 	var statements = g.statements();
 	for (i in statements) $("#result").append("<p>" + statements[i].string + "</p>");
