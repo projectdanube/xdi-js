@@ -50,9 +50,9 @@ window.xdi = (function () {
 
 		var context = this._root.context(statement.subject.string);
 
-		if (statement.predicate == "()") context.context(statement.object);
-		else if (statement.predicate == "!") context.literal(xdi.util.fromDataSegment(statement.object));
-		else context.relation(statement.predicate, statement.object);
+		if (statement.predicate.string === "()") context.context(statement.object.string);
+		else if (statement.predicate.string === "!") context.literal(xdi.util.fromDataSegment(statement.object.string));
+		else context.relation(statement.predicate.string, statement.object.string);
 	};
 
 	function Context(graph, parent, arc) {
@@ -101,15 +101,17 @@ window.xdi = (function () {
 		
 			var arcXri = arcXris.subsegments[i];
 			
-			context = context._contexts[arcXri];
+			var newcontext = context._contexts[arcXri];
 
-			if (typeof context === 'undefined') {
+			if (typeof newcontext === 'undefined') {
 	
 				if (! create) return null;
 				
-				context = new Context(this.graph, this, arcXri);
-				this._contexts[arcXri] = context;
+				newcontext = new Context(this.graph, context, arcXri);
+				this._contexts[arcXri] = newcontext;
 			}
+			
+			context = newcontext;
 		}
 
 		return context;
