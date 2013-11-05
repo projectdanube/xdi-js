@@ -1,0 +1,37 @@
+body {
+	font-family: Calibri, Arial, Helvetica, sans-serif;
+	font-size: 12pt;
+	padding: 0px;
+	margin: 10px;
+}
+
+input, textarea {
+	font-family: Courier New, monospace;
+	padding: 10px;
+}
+
+.result {
+	font-family: Courier New, monospace;
+	background-color: #a0a0a0;
+	border: 2px dashed black;
+	margin-top: 10px;
+	padding: 10px;
+}
+
+p.segment {
+	line-height: 3em;
+	margin: 0px;
+	padding: 0px;
+}
+
+p.subsegment {
+	line-height: 1.2em;
+	margin: 0px;
+	padding: 0px 0px 0px 20px;
+}
+
+p.graph {
+	line-height: 1.2em;
+	margin: 0px;
+	padding: 0px;
+}

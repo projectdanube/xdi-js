@@ -1,26 +1,71 @@
 <html>
+
 <head>
+
+<link rel="stylesheet" target="_blank" href="style.css" TYPE="text/css" MEDIA="screen">
+<link rel="shortcut icon" href="favicon.ico" />
+
 <script type="text/javascript" src="jquery-1.6.4.min.js"></script>
 <script type="text/javascript" src="xdi.js"></script>
 <script type="text/javascript">
-function c() {
 
-	var g = xdi.graph();
-/*	g.root().context("=markus").context("$!(+email)").literal("markus.sabadello@gmail.com");
-	g.root().context("=markus").relation("+friend", "=joe");
-	g.root().context("=markus").relation("+friend", "=drummond");
-	g.root().context("=markus").context("+first").context("$!(+name)").literal("Markus");*/
-	g.statement("=markus$!(+(+email/+test)+(email))/!/(data:,xxx)");
-	
-	var statements = g.statements();
-	for (i in statements) $("#result").append("<p>" + statements[i].string + "</p>");
+function syntax() {
+
+	var statement = xdi.parser.parseStatement($("#syntaxinput").val());
+
+	$("#syntaxresult").html("");
+	$("#syntaxresult").append("<p class='segment'>SUBJECT:&nbsp;" + statement.subject.string + "</p>");
+	for (var subsegment in statement.subject.subsegments) $("#syntaxresult").append("<p class='subsegment'>" + statement.subject.subsegments[subsegment].string + "</p>");
+	$("#syntaxresult").append("<p class='segment'>PREDICATE:&nbsp;" + statement.predicate.string + "</p>");
+	for (var subsegment in statement.predicate.subsegments) $("#syntaxresult").append("<p class='subsegment'>" + statement.predicate.subsegments[subsegment].string + "</p>");
+	$("#syntaxresult").append("<p class='segment'>OBJECT:&nbsp;" + (statement.object.string || JSON.stringify(statement.object)) + "</p>");
 
 }
+
+function syntaxclear() {
+
+	$("#syntaxresult").html("");
+}
+
+function graph() {
+
+	eval($("#graphinput").val());
+	
+	var statements = g.statements();
+	$("#graphresult").html("");
+	for (var i in statements) $("#graphresult").append("<p class='graph'>" + statements[i].string + "</p>");
+}
+
+function graphclear() {
+
+	$("#graphresult").html("");
+}
+
 </script>
+
 </head>
+
 <body>
-<button onclick="c();">Click here</button>
-<p>Result:</p>
-<div id="result"></div>
+
+<h1>Syntax Demo</h1>
+<input type="text" id="syntaxinput" size="50" value='[=]!1111[+address]!1<+street>&/&/"MyStreet123"'>
+<button onclick="syntax();">Syntax Demo</button>
+<button onclick="syntaxclear();">Syntax Clear</button>
+<div class="result" id="syntaxresult"></div>
+
+<h1>Graph Demo</h1>
+<textarea id="graphinput" cols="120" rows="8">
+var g = xdi.graph();
+g.root().context("=markus").context("<+email>").context("&").literal("markus.sabadello@gmail.com");
+g.root().context("=markus").relation("+friend", "=joe");
+g.root().context("=markus").relation("+friend", "=drummond");
+g.root().context("=markus").context("+first").context("<+name>").context("&").literal("Markus");
+g.statement("=markus+last<+name>&/&/\"Sabadello\"");
+</textarea>
+<button onclick="graph();">Graph Demo</button>
+<button onclick="graphclear();">Graph Clear</button>
+<div class="result" id="graphresult"></div>
+
 </body>
+
 </html>
