@@ -2,7 +2,7 @@
 <img src="http://projectdanube.github.com/xdi-js/images/logo64.png"><br>
 
 [XDI-js](http://github.com/projectdanube/xdi-js) is an XDI client library for JavaScript, intended to be used by browser-based applications
-to communicate with XDI servers.. 
+to communicate with XDI servers.
 
 A sample deployment of XDI-js is available at http://xdi-js.projectdanube.org.
 
