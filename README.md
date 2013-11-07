@@ -10,7 +10,7 @@ A sample deployment of XDI-js is available at http://xdi-js.projectdanube.org.
 
 * xdi.parser
 * xdi.graph
-* xdi.message
+* xdi.client
 * xdi.discovery
 
 ### Community
