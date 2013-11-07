@@ -13,9 +13,10 @@ input, textarea {
 .result {
 	font-family: Courier New, monospace;
 	background-color: #a0a0a0;
-	border: 2px dashed black;
+	border: 3px dashed black;
 	margin-top: 10px;
 	padding: 10px;
+	white-space: pre;
 }
 
 p.segment {
