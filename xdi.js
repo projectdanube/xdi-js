@@ -26,7 +26,7 @@
 
 	Statement.prototype.isContextNodeStatement = function() {
 
-		return this.predicate.string === xdi.constants.xri_context.string;
+		return this.predicate.string === xdi.constants.xri_context;
 	};
 
 	Statement.prototype.isRelationStatement = function() {
@@ -36,7 +36,7 @@
 
 	Statement.prototype.isLiteralStatement = function() {
 
-		return this.predicate.string === xdi.constants.xri_literal.string;
+		return this.predicate.string === xdi.constants.xri_literal;
 	};
 
 	Statement.prototype.innerRootNotationStatement = function() {
@@ -172,11 +172,11 @@
 
 		statement = statement.fromInnerRootNotation(statement);
 
-		var context = (statement.subject.string === xdi.constants.xri_root.string) ? this._root : this._root.context(statement.subject.string);
+		var context = (statement.subject.string === xdi.constants.xri_root) ? this._root : this._root.context(statement.subject.string, true);
 
-		if (statement.isContextNodeStatement()) context.context(statement.object.string);
+		if (statement.isContextNodeStatement()) context.context(statement.object.string, true);
 		else if (statement.isLiteralStatement()) context.literal(statement.object);
-		else context.relation(statement.predicate.string, statement.object.string);
+		else context.relation(statement.predicate.string, statement.object.string, true);
 	};
 
 	function Context(graph, parent, arc) {
@@ -219,7 +219,7 @@
 
 	Context.prototype.context = function(arcsString, create) {
 
-		create = typeof create !== 'undefined' ? create : true;
+		create = typeof create !== 'undefined' ? create : false;
 
 		var arcs = xdi.parser.parseSegment(arcsString);
 		var context = this;
@@ -250,15 +250,54 @@
 		return context;
 	};
 
-	Context.prototype.relations = function() {
+	Context.prototype.relations = function(arcString, targetString) {
 
-		return this._relations;
+		var relations = [];
+
+		if (typeof arcString === 'undefined') {
+			
+			for (var i in this._relations) {
+				
+				for (var ii in this._relations[i]) {
+					
+					relations.push(this._relations[i][ii]);
+				}
+			}
+		} else {
+	
+			if (typeof targetString === 'undefined') {
+
+				if (typeof this._relations[arcString] !== 'undefined') {
+					
+					for (var ii in this._relations[arcString]) {
+						
+						relations.push(this._relations[arcString][ii]);
+					}
+				}
+			} else {
+
+				if (typeof this._relations[arcString] !== 'undefined' && typeof this._relations[arcString][targetString] !== 'undefined') {
+					
+					relations.push(this._relations[arcString][targetString]);
+				}
+			}
+		}
+		
+		return relations;
 	};
 
 	Context.prototype.relation = function(arcString, targetString, create) {
 
-		create = typeof create !== 'undefined' ? create : true;
+		create = typeof create !== 'undefined' ? create : false;
 
+		if (! create) {
+			
+			var relations = this.relations(arcString, targetString);
+			if (typeof relations[0] === 'undefined') return null;
+			
+			return relations[0];
+		}
+		
 		var arc = xdi.parser.parseSegment(arcString);
 		var target = xdi.parser.parseSegment(targetString);
 		var relation = typeof this._relations[arcString] === 'undefined' ? undefined : this._relations[arcString][targetString];
@@ -267,7 +306,7 @@
 
 			if (! create) return null;
 
-			this.graph.root().context(targetString);
+			this.graph.root().context(targetString, true);
 
 			relation = new Relation(this.graph, this, arc, target);
 			if (typeof this._relations[arcString] === 'undefined') this._relations[arcString] = { };
@@ -281,11 +320,12 @@
 
 		var literal = this._literal;
 
-		if (literal === null) {
+		if (literal !== null) return literal;
 
-			literal = new Literal(this.graph, this, data);
-			this._literal = literal;
-		}
+		if (typeof data === 'undefined') return null;
+
+		literal = new Literal(this.graph, this, data);
+		this._literal = literal;
 
 		return literal;
 	};
@@ -310,27 +350,93 @@
 		this.parent = parent;
 		this.data = data;
 
-		this.statement = new Statement(null, this.parent.xri, xdi.constants.xri_literal, this.data);
+		this.statement = new Statement(null, this.parent.xri, xdi.parser.parseSegment(xdi.constants.xri_literal), this.data);
 	}
 
 	/*
-	 * Message class
+	 * MessageEnvelope and Message classes
 	 */
 
-	function Message(sender) {
+	function MessageEnvelope() {
 
-		if (! (this instanceof Message)) return new Message(sender);
+		if (! (this instanceof MessageEnvelope)) return new MessageEnvelope(sender);
 
-		this.sender = sender;
-
-		this.graph = new Graph();
-
+		this._graph = new Graph();
+		this._messages = [];
 	}
 
-	Message.prototype.linkcontract = function(linkcontract) {
-
+	MessageEnvelope.prototype.graph = function() {
+		
+		return this._graph;
 	};
 
+	MessageEnvelope.prototype.message = function(sender) {
+		
+		if (typeof sender === 'undefined') sender = xdi.constants.xri_anon;
+
+		var context = this._graph.root().context(sender, true).context('[' + xdi.constants.xri_msg + ']', true).context('!:uuid:' + xdi.util.guid(), true);
+		var message = new Message(context, this);
+
+		this._messages.push(message);
+
+		return message;
+	};
+
+	MessageEnvelope.prototype.messages = function() {
+		
+		return this._messages;
+	};
+	
+	function Message(context, messageEnvelope) {
+
+		if (! (this instanceof Message)) return new Message(sender);
+		
+		this._context = context;
+		this._messageEnvelope = messageEnvelope;
+		
+		this._operationsContext = context.context(xdi.constants.xri_do, true);
+	}
+
+	Message.prototype.messageEnvelope = function() {
+		
+		return this._messageEnvelope;
+	};
+	
+	Message.prototype.toAddress = function(toAddress) {
+
+		if (typeof toAddress === 'undefined') {
+			
+			var relation = this._context.relation(xdi.constants_xri_is_context);
+			
+			return relation.target || null;
+		}
+		
+		this._context.relation(xdi.constants.xri_is_context, toAddress, true);
+		
+		return this;
+	};
+	
+	Message.prototype.linkContract = function(linkContract) {
+
+		if (typeof linkContract === 'undefined') {
+			
+			var relation = this._context.relation(xdi.constants_xri_do);
+			
+			return relation.target || null;
+		}
+		
+		this._context.relation(xdi.constants.xri_do, linkContract, true);
+		
+		return this;
+	};
+
+	Message.prototype.operation = function(operation, target) {
+		
+		this._operationsContext.relation(operation, target, true);
+		
+		return this;
+	};
+	
 	/*
 	 * Client class
 	 */
@@ -363,11 +469,15 @@
 				xs_variable: "{}",
 				xs_class: "[]",
 				xs_attribute: "<>",
-				xri_root: null,
-				xri_context: null,
-				xri_value: null,
-				xri_literal: null,
-				xri_variable: null
+				xri_root: "()",
+				xri_context: "()",
+				xri_value: "&",
+				xri_literal: "&",
+				xri_variable: "{}",
+				xri_anon: "$anon",
+				xri_msg: "$msg",
+				xri_is_context: "$is()",
+				xri_do: "$do"
 			},
 
 			graph: function() {
@@ -375,15 +485,25 @@
 				return new Graph();
 			},
 
+			messageEnvelope: function() {
+				
+				return new MessageEnvelope();
+			},
+			
+			message: function(sender) {
+				
+				return xdi.messageEnvelope().message(sender);
+			},
+			
 			util: {
 
 				concatSegments: function(segment1, segment2) {
 
 					var buffer = "";
-					if (segment1 !== null && segment1.string !== xdi.constants.xri_root.string) buffer += segment1.string;
-					if (segment2 !== null && segment2.string !== xdi.constants.xri_root.string) buffer += segment2.string;
+					if (segment1 !== null && segment1.string !== xdi.constants.xri_root) buffer += segment1.string;
+					if (segment2 !== null && segment2.string !== xdi.constants.xri_root) buffer += segment2.string;
 
-					if (buffer === "") buffer = xdi.constants.xri_root.string;
+					if (buffer === "") buffer = xdi.constants.xri_root;
 
 					return xdi.parser.parseSegment(buffer);
 				},
@@ -406,6 +526,13 @@
 					}
 					
 					return new Statement(null, subject, predicate, object);
+				},
+				
+				guid: function() {
+
+					var s4 = function() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); };
+					
+					return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 				}
 			},
 
@@ -437,35 +564,6 @@
 			},
 
 			parser: {
-
-				cs: function(char) {
-
-					for (var i in xdi.constants.cs_array) if (xdi.constants.cs_array[i] === char) return xdi.constants.cs_array[i];
-
-					return null;
-				},
-
-				cla: function(char) {
-
-					if (xdi.constants.xs_class.charAt(0) === char) return xdi.constants.xs_class;
-
-					return null;
-				},
-
-				att: function(char) {
-
-					if (xdi.constants.xs_attribute.charAt(0) === char) return xdi.constants.xs_attribute;
-
-					return null;
-				},
-
-				xs: function(char) {
-
-					if (xdi.constants.xs_root.charAt(0) === char) return xdi.constants.xs_root;
-					if (xdi.constants.xs_variable.charAt(0) === char) return xdi.constants.xs_variable;
-
-					return null;
-				},
 
 				parseStatement: function(string) {
 
@@ -671,6 +769,35 @@
 					return new Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal);
 				},
 
+				cs: function(char) {
+
+					for (var i in xdi.constants.cs_array) if (xdi.constants.cs_array[i] === char) return xdi.constants.cs_array[i];
+
+					return null;
+				},
+
+				cla: function(char) {
+
+					if (xdi.constants.xs_class.charAt(0) === char) return xdi.constants.xs_class;
+
+					return null;
+				},
+
+				att: function(char) {
+
+					if (xdi.constants.xs_attribute.charAt(0) === char) return xdi.constants.xs_attribute;
+
+					return null;
+				},
+
+				xs: function(char) {
+
+					if (xdi.constants.xs_root.charAt(0) === char) return xdi.constants.xs_root;
+					if (xdi.constants.xs_variable.charAt(0) === char) return xdi.constants.xs_variable;
+
+					return null;
+				},
+
 				stripXs: function(string) {
 
 					string = xdi.parser.stripPattern(string, /\([^\(\)]*\)/);
@@ -749,12 +876,6 @@
 				}
 			}
 	};
-
-	xdi.constants.xri_root = xdi.parser.parseSegment("()");
-	xdi.constants.xri_context = xdi.parser.parseSegment("()");
-	xdi.constants.xri_value = xdi.parser.parseSegment("&");
-	xdi.constants.xri_literal = xdi.parser.parseSegment("&");
-	xdi.constants.xri_variable = xdi.parser.parseSegment("{}");
 
 	/*
 	 * Assign global 'xdi' object
