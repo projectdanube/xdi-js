@@ -41,7 +41,7 @@ var message = xdi.message(sender);
 message.toAddress(toAddress);
 message.linkContract(linkContract);
 message.operation(operation, target);
-message.send(endpoint);
+var result = message.send(endpoint);
 ```
 
 #### Discovery
