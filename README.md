@@ -12,7 +12,7 @@ A sample deployment of XDI-js is available at http://xdi-js.projectdanube.org.
 
 ```
 var statement = xdi.parser.parseStatement('=markus<+email>&/&/"Markus"');
-for (var i in statement.subject.subsegments) alert(statement.subject.subsegments[i]);
+for (var i in statement.subject().subsegments()) alert(statement.subject().subsegments()[i]);
 ```
 
 #### Graph
@@ -37,17 +37,35 @@ alert(xdi.io.write(graph));
 #### Client
 
 ```
-var message = xdi.message(sender);
-message.toAddress(toAddress);
-message.linkContract(linkContract);
-message.operation(operation, target);
-var result = message.send(endpoint);
+var message = xdi.message("$anon");
+message.toAddress("([@]!:uuid:8888)");
+message.linkContract("$public$do");
+message.operation("$get", "[@]!:uuid:8888<+name>");
+
+message.send(
+	"http://xdi.csp.org/myxdiendpoint",
+	function(response) {
+		alert(xdi.io.write(response));
+	},
+	function(errorText) {
+		alert(errorText);
+	}
+);
 ```
 
 #### Discovery
 
 ```
-TODO
+xdi.discovery(
+	"@acmebread",
+	function(discovery) {
+		alert(discovery.cloudNumber());
+		alert(discovery.xdiEndpoint());
+	},
+	function(errorText) {
+		alert(errorText);
+	}
+);
 ```
 
 ### Community
