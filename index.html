@@ -27,12 +27,12 @@ function syntax() {
 
 	$("#syntaxresult").html("");
 	$("#syntaxresult").append("<p class='segment'>STATEMENT TYPE:&nbsp;" + _.escape(type) + "</p>");
-	$("#syntaxresult").append("<p class='segment'>SUBJECT:&nbsp;" + _.escape(statement.subject.string) + "</p>");
-	for (var subsegment in statement.subject.subsegments) $("#syntaxresult").append("<p class='subsegment'>" + _.escape(statement.subject.subsegments[subsegment].string) + "</p>");
+	$("#syntaxresult").append("<p class='segment'>SUBJECT:&nbsp;" + _.escape(statement.subject().string()) + "</p>");
+	for (var subsegment in statement.subject().subsegments()) $("#syntaxresult").append("<p class='subsegment'>" + _.escape(statement.subject().subsegments()[subsegment].string()) + "</p>");
 	$("#syntaxresult").append("<p class='segment'>PREDICATE:&nbsp;" + _.escape(statement.predicate.string) + "</p>");
-	for (var subsegment in statement.predicate.subsegments) $("#syntaxresult").append("<p class='subsegment'>" + _.escape(statement.predicate.subsegments[subsegment].string) + "</p>");
-	$("#syntaxresult").append("<p class='segment'>OBJECT:&nbsp;" + _.escape(statement.object.string || JSON.stringify(statement.object)) + "</p>");
-	if ((statement.object.subsegments) !== "undefined") for (var subsegment in statement.object.subsegments) $("#syntaxresult").append("<p class='subsegment'>" + _.escape(statement.object.subsegments[subsegment].string) + "</p>");
+	for (var subsegment in statement.predicate().subsegments()) $("#syntaxresult").append("<p class='subsegment'>" + _.escape(statement.predicate().subsegments()[subsegment].string()) + "</p>");
+	$("#syntaxresult").append("<p class='segment'>OBJECT:&nbsp;" + (statement.object() instanceof xdi.Segment || statement.object() instanceof xdi.Subsegment ? _.escape(statement.object().string()) : _.escape(JSON.stringify(statement.object()))) + "</p>");
+	if (statement.object() instanceof xdi.Segment) for (var subsegment in statement.object().subsegments()) $("#syntaxresult").append("<p class='subsegment'>" + _.escape(statement.object().subsegments()[subsegment].string()) + "</p>");
 }
 
 function syntaxclear() {
@@ -48,7 +48,7 @@ function graph() {
 
 	$("#graphresult").html("");
 	$("#graphresult").append("<p class='segment'>STATEMENTS: " + statements.length + "</p>");
-	for (var i in statements) $("#graphresult").append("<p class='graph'>" + _.escape(statements[i].string) + "</p>");
+	for (var i in statements) $("#graphresult").append("<p class='graph'>" + _.escape(statements[i].string()) + "</p>");
 }
 
 function graphclear() {
@@ -62,34 +62,25 @@ function client() {
 	var toAddress = $("#clientinput2").val();
 	var sender = $("#clientinput3").val();
 	var linkContract = $("#clientinput4").val();
-	var operation = $("#clientinput5").val();
+	var operation = $('input[name=clientinput5]:radio:checked').val();
 	var target = $("#clientinput6").val();
-	
+
 	var message = xdi.message(sender);
 	message.toAddress(toAddress);
 	message.linkContract(linkContract);
 	message.operation(operation, target);
 
-	$.ajax(
+	message.send(
+
 		endpoint,
-		{
-			accepts: {
-				text: "text/xdi"
-			},
-			dataType: "text",
-			contentType: "text/xdi",
-			type: "POST",
-			processData: false,
-			data: xdi.io.write(message.messageEnvelope().graph()),
-			success: function(data) {
-				var statements = xdi.io.read(data).statements();
-				$("#clientresult").html("");
-				$("#clientresult").append("<p class='segment'>STATEMENTS: " + statements.length + "</p>");
-				for (var i in statements) $("#clientresult").append("<p class='graph'>" + _.escape(statements[i].string) + "</p><br>");
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				alert(textStatus + " / " + errorThrown);
-			}
+		function(response) {
+			var statements = response.statements();
+			$("#clientresult").html("");
+			$("#clientresult").append("<p class='segment'>STATEMENTS: " + statements.length + "</p>");
+			for (var i in statements) $("#clientresult").append("<p class='graph'>" + _.escape(statements[i].string()) + "</p><br>");
+		},
+		function(errorText) {
+			alert(errorText);
 		}
 	);
 }
@@ -101,33 +92,18 @@ function clientclear() {
 
 function discovery() {
 
-	var xri = xdi.parser.parseSegment($("#discoveryinput").val());
+	var xri = $("#discoveryinput").val();
 
-	var endpoint = "http://mycloud.neustar.biz:12220/";
-	var message = xdi.graph();
-	message.statement("$anon[$msg]!1/$do/$public");
-	message.statement("$anon[$msg]!1$do/$get/(" + xri.string + ")");
+	xdi.discovery(
 
-	$.ajax(
-		endpoint,
-		{
-			accepts: {
-				text: "text/xdi"
-			},
-			dataType: "text",
-			contentType: "text/xdi",
-			type: "POST",
-			processData: false,
-			data: xdi.io.write(message),
-			success: function(data) {
-				var statements = xdi.io.read(data).statements();
-				$("#discoveryresult").html("");
-				$("#discoveryresult").append("<p class='segment'>STATEMENTS: " + statements.length + "</p>");
-				for (var i in statements) $("#discoveryresult").append("<p class='graph'>" + _.escape(statements[i].string) + "</p><br>");
-			},
-			error: function(jqXHR, textStatus, errorThrown) {
-				alert(textStatus + " / " + errorThrown);
-			}
+		xri,
+		function(discovery) {
+			$("#discoveryresult").html("");
+			$("#discoveryresult").append("<p class='segment'>CLOUD NUMBER: " + discovery.cloudNumber() + "</p>");
+			$("#discoveryresult").append("<p class='segment'>XDI ENDPOINT: " + discovery.xdiEndpoint() + "</p>");
+		},
+		function(errorText) {
+			alert(errorText);
 		}
 	);
 }
@@ -149,6 +125,8 @@ $(function() {
 <body>
 
 <div id="tabs">
+
+<img src="images/projectdanube_logo.png" style="float: right; margin: 10px;">
 
 <ul>
 <li><a href="#tabs-1"><img src="images/logo64.png"></a></li>
@@ -191,9 +169,9 @@ g.statement("=x/+y/(=a/+b/=c)");
 <p><input type="text" id="clientinput3" size="50" value='$anon'></p>
 <p><input type="text" id="clientinput4" size="50" value='$public$do'></p>
 <p>
-<input type="radio" id="clientinput5" value="$get" checked>&nbsp;$get
-<input type="radio" id="clientinput5" value="$set">&nbsp;$set
-<input type="radio" id="clientinput5" value="$del">&nbsp;$del
+<input type="radio" name="clientinput5" value="$get" checked>&nbsp;$get
+<input type="radio" name="clientinput5" value="$set">&nbsp;$set
+<input type="radio" name="clientinput5" value="$del">&nbsp;$del
 </p>
 <p><input type="text" id="clientinput6" size="50" value='@acmebread<+name>'></p>
 <button onclick="client();">Client</button>
