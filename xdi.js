@@ -984,7 +984,7 @@
 							pos++;
 						}
 
-						if (pairs.length > 0) throw "Missing closing character '" + pairs[pairs.length - 1].charAt(1) + "'.";
+						if (pairs.length > 0) throw "Missing closing character '" + pairs[pairs.length - 1].charAt(1) + "' at position " + pos + ".";
 
 						subsegments.push(xdi.parser.parseSubsegment(string.substring(start, pos)));
 
@@ -1007,7 +1007,7 @@
 
 					if (pos < len && (cla = xdi.parser.cla(string.charAt(pos))) !== null) {
 
-						if (string.charAt(len - 1) !== cla.charAt(1)) throw "Invalid subsegment: " + string + " (invalid closing '" + cla.charAt(1) + "' character for class)";
+						if (string.charAt(len - 1) !== cla.charAt(1)) throw "Invalid subsegment: " + string + " (invalid closing '" + cla.charAt(1) + "' character for class at position " + pos + ")";
 
 						pos++; len--;
 					}
@@ -1016,7 +1016,7 @@
 
 					if (pos < len && (att = xdi.parser.att(string.charAt(pos))) !== null) {
 
-						if (string.charAt(len - 1) !== att.charAt(1)) throw "Invalid subsegment: " + string + " (invalid closing '" + att.charAt(1) + "' character for attribute)";
+						if (string.charAt(len - 1) !== att.charAt(1)) throw "Invalid subsegment: " + string + " (invalid closing '" + att.charAt(1) + "' character for attribute at position " + pos + ")";
 
 						pos++; len--;
 					}
@@ -1037,7 +1037,7 @@
 							xref = xdi.parser.parseXref(string.substring(pos, len));
 						} else {
 
-							if (pos === 0) throw "Invalid subsegment: " + string + " (no cs, xref)";
+							if (pos === 0) throw "Invalid subsegment: " + string + " (no context symbol or cross reference)";
 							literal = xdi.parser.parseLiteral(string.substring(pos, len));
 						}
 					}
@@ -1050,8 +1050,8 @@
 				parseXref: function(string) {
 
 					var xs = xdi.parser.xs(string.charAt(0));
-					if (xs === null) throw "Invalid xref: " + string + " (no opening delimiter)";
-					if (string.charAt(string.length - 1) !== xs.charAt(1)) throw "Invalid xref: " + string + " (invalid closing '" + xs.charAt(1) + "' character)";
+					if (xs === null) throw "Invalid cross reference: " + string + " (no opening delimiter)";
+					if (string.charAt(string.length - 1) !== xs.charAt(1)) throw "Invalid cross reference: " + string + " (invalid closing '" + xs.charAt(1) + "' delimiter)";
 					if (string.length === 2) return new Xref(string, xs, null, null, null, null, null, null);
 
 					var value = string.substring(1, string.length - 1);
