@@ -735,8 +735,8 @@
 				xs_variable: "{}",
 				xs_class: "[]",
 				xs_attribute: "<>",
-				xri_root: "()",
-				xri_context: "()",
+				xri_root: "",
+				xri_context: "",
 				xri_value: "&",
 				xri_literal: "&",
 				xri_variable: "{}",
@@ -896,7 +896,7 @@
 
 					var temp = xdi.parser.stripXs(string);
 
-					var parts = temp.split("/");
+					var parts = temp.split("/", -1);
 					if (parts.length !== 3) throw "Invalid statement: " + string + " (wrong number of segments: " + parts.length + ")";
 					var split0 = parts[0].length;
 					var split1 = parts[1].length;
