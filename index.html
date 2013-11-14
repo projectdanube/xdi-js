@@ -154,8 +154,8 @@ var g = xdi.graph();
 g.root().context("=markus", true).context("<+email>", true).context("&", true).literal("markus.sabadello@gmail.com");
 g.root().context("=markus", true).relation("+friend", "=joe", true);
 g.root().context("=markus", true).relation("+friend", "=drummond", true);
-g.root().context("=markus", true).context("+first", true).context("<+name>", true).context("&", true).literal("Markus");
-g.statement("=markus+last<+name>&/&/\"Sabadello\"");
+g.root().context("=markus", true).context("<+first>", true).context("<+name>", true).context("&", true).literal("Markus");
+g.statement("=markus<+last><+name>&/&/\"Sabadello\"");
 g.statement("=x/+y/(=a/+b/=c)");
 </textarea>
 <button onclick="graph();">Graph</button>

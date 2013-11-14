@@ -22,8 +22,8 @@ var graph = xdi.graph();
 graph.root().context("=markus", true).context("<+email>", true).context("&", true).literal("markus.sabadello@gmail.com");
 graph.root().context("=markus", true).relation("+friend", "=joe", true);
 graph.root().context("=markus", true).relation("+friend", "=drummond", true);
-graph.root().context("=markus", true).context("+first", true).context("<+name>", true).context("&", true).literal("Markus");
-graph.statement("=markus+last<+name>&/&/\"Sabadello\"");
+graph.root().context("=markus", true).context("<+first>", true).context("<+name>", true).context("&", true).literal("Markus");
+graph.statement("=markus<+last><+name>&/&/\"Sabadello\"");
 graph.statement("=x/+y/(=a/+b/=c)");
 ```
 
