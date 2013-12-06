@@ -792,15 +792,15 @@
 						
 						var cloudNumberRelation = cloudNameContext.relation(xdi.constants.xri_ref);
 						
-						if (cloudNumberRelation === null) {
+						var cloudNumber;
+						
+						if (cloudNumberRelation !== null) {
 							
-							var errorText = 'Could not find cloud number in discovery result.';
-							
-							if (typeof error === 'function') error(errorText);
-							return;
+							cloudNumber = cloudNumberRelation.target().string().substring(1, cloudNumberRelation.target().string().length - 1);
+						} else {
+						
+							cloudNumber = target;
 						}
-
-						var cloudNumber = cloudNumberRelation.target().string().substring(1, cloudNumberRelation.target().string().length - 1);
 
 						var xdiEndpointContext = response.root().context('(' + cloudNumber + ')' + xdi.constants.xri_xdi_uri);
 						
