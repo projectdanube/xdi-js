@@ -603,7 +603,7 @@
 			
 			var relation = this._context.relation(xdi.constants_xri_is_context);
 			
-			return relation.target || null;
+			return relation === null ? null : relation.target;
 		}
 		
 		this._context.relation(xdi.constants.xri_is_context, toAddress, true);
@@ -617,7 +617,7 @@
 			
 			var relation = this._context.relation(xdi.constants_xri_do);
 			
-			return relation.target || null;
+			return relation === null ? null : relation.target;
 		}
 		
 		this._context.relation(xdi.constants.xri_do, linkContract, true);
@@ -629,9 +629,10 @@
 
 		if (typeof secretToken === 'undefined') {
 			
-			var literal = this._context.literal(xdi.constants.xri_secret_token);
+			var context = this._context.context(xdi.constants.xri_secret_token);
+			var literal = context === null ? null : context.literal();
 			
-			return literal.data() || null;
+			return literal === null ? null : literal.data();
 		}
 		
 		this._context.context(xdi.constants.xri_secret_token, true).literal(secretToken);
