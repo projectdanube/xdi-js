@@ -624,6 +624,20 @@
 		
 		return this;
 	};
+	
+	Message.prototype.secretToken = function(secretToken) {
+
+		if (typeof secretToken === 'undefined') {
+			
+			var literal = this._context.literal(xdi.constants_xri_secret_token);
+			
+			return literal.data || null;
+		}
+		
+		this._context.literal(xdi.constants.constants_xri_secret_token, secretToken);
+		
+		return this;
+	};
 
 	Message.prototype.operation = function(operation, target) {
 
@@ -745,6 +759,7 @@
 				xri_is_context: "$is()",
 				xri_ref: "$ref",
 				xri_rep: "$rep",
+				xri_secret_token: "<$secret><$token>&",
 				xri_do: "$do",
 				xri_public_do: "$public$do",
 				xri_xdi_uri: "<$xdi><$uri>",
