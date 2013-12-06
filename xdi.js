@@ -629,12 +629,12 @@
 
 		if (typeof secretToken === 'undefined') {
 			
-			var literal = this._context.literal(xdi.constants_xri_secret_token);
+			var literal = this._context.literal(xdi.constants.xri_secret_token);
 			
-			return literal.data || null;
+			return literal.data() || null;
 		}
 		
-		this._context.literal(xdi.constants.constants_xri_secret_token, secretToken);
+		this._context.context(xdi.constants.xri_secret_token, true).literal(secretToken);
 		
 		return this;
 	};
