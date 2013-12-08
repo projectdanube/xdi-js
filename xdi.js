@@ -357,6 +357,9 @@
 					
 					this.statement(i + '/' + value[ii]);
 				}
+			} else if (Object.prototype.toString.call(value) === '[object Object]') {
+					
+				throw "Inner Root not implemented";
 			} else {
 				
 				if (i.slice(-1) !== '&') throw 'Invalid key ' + i;
@@ -759,9 +762,12 @@
 			target = xdi.util.concatStatement(innerRoot, target, true);
 
 			this._operationsContext.graph().statement(target);
-		} else {
+		} else if (target instanceof Segment) {
 
 			this._operationsContext.relation(operation, target, true);
+		} else {
+			
+			throw "Invalid target: " + target;
 		}
 
 		return this;
