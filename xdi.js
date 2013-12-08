@@ -268,7 +268,7 @@
 
 	Graph.prototype.statement = function(statement) {
 
-		statement = Object.prototype.toString.call(statement) === '[object Statement]' ? statement : xdi.parser.parseStatement(statement);
+		statement = statement instanceof Statement ? statement : xdi.parser.parseStatement(statement);
 
 		statement = statement.fromInnerRootNotation(statement);
 
@@ -451,13 +451,9 @@
 
 	Context.prototype.context = function(arcs, create) {
 
-		arcs = Object.prototype.toString.call(arcs) === '[object Segment]' ? arcs : xdi.parser.parseSegment(arcs);
+		arcs = typeof arcs === 'undefined' ? arcs : ( arcs instanceof Segment ? arcs : xdi.parser.parseSegment(arcs) );
+		create = typeof create === 'undefined' ? false : create;
 
-		var arcsString = arcs.string();
-
-		create = typeof create !== 'undefined' ? create : false;
-
-		var arcs = xdi.parser.parseSegment(arcsString);
 		var context = this;
 
 		for (var i=0; i<arcs.subsegments().length; i++) {
@@ -488,11 +484,11 @@
 
 	Context.prototype.relations = function(arc, target) {
 
-		arc = Object.prototype.toString.call(arc) === '[object Segment]' ? arc : xdi.parser.parseSegment(arc);
-		target = Object.prototype.toString.call(target) === '[object Segment]' ? target : xdi.parser.parseSegment(target);
+		arc = typeof arc === 'undefined' ? arc : ( arc instanceof Segment ? arc : xdi.parser.parseSegment(arc) );
+		target = typeof target === 'undefined' ? target : ( target instanceof Segment ? target : xdi.parser.parseSegment(target) );
 
-		var arcString = arc.string();
-		var targetString = target.string();
+		var arcString = typeof arc === 'undefined' ? arc : ( arc.string() );
+		var targetString = typeof target === 'undefined' ? target : ( target.string() );
 
 		var relations = [];
 
@@ -530,22 +526,22 @@
 
 	Context.prototype.relation = function(arc, target, create) {
 
-		arc = Object.prototype.toString.call(arc) === '[object Segment]' ? arc : xdi.parser.parseSegment(arc);
-		target = Object.prototype.toString.call(target) === '[object Segment]' ? target : xdi.parser.parseSegment(target);
-		create = typeof create !== 'undefined' ? create : false;
+		arc = typeof arc === 'undefined' ? arc : ( arc instanceof Segment ? arc : xdi.parser.parseSegment(arc) );
+		target = typeof target === 'undefined' ? target : ( target instanceof Segment ? target : xdi.parser.parseSegment(target) );
+		create = typeof create === 'undefined' ? false : create;
 
-		var arcString = arc.string();
-		var targetString = target.string();
-		
+		var arcString = typeof arc === 'undefined' ? arc : arc.string();
+		var targetString = typeof target === 'undefined' ? target : target.string();
+
 		if (! create) {
 
-			var relations = this.relations(arcString, targetString);
+			var relations = this.relations(arc, target);
 			if (typeof relations[0] === 'undefined') return null;
 
 			return relations[0];
 		}
 
-		var relation = typeof this._relations[arcString] === 'undefined' ? undefined : this._relations[arcString][targetString];
+		var relation = typeof this._relations[arcString] === 'undefined' ? this._relations[arcString] : this._relations[arcString][targetString];
 
 		if (typeof relation === 'undefined') {
 
@@ -742,7 +738,31 @@
 
 	Message.prototype.operation = function(operation, target) {
 
-		this._operationsContext.relation(operation, target, true);
+		operation = typeof operation === 'undefined' ? operation : ( operation instanceof Segment ? operation : xdi.parser.parseSegment(operation) );
+
+		if (typeof target === 'string') {
+
+			try {
+
+				target = xdi.parser.parseStatement(target);
+			} catch (ex) {
+				
+				target = xdi.parser.parseSegment(target);
+			}
+		}
+		
+		if (target instanceof Statement) {
+			
+			var innerRoot = xdi.parser.parseSegment("(" + this._operationsContext.xri().string() + "/" + operation.string() + ")");
+			
+			target = target.fromInnerRootNotation();
+			target = xdi.util.concatStatement(innerRoot, target, true);
+
+			this._operationsContext.graph().statement(target);
+		} else {
+
+			this._operationsContext.relation(operation, target, true);
+		}
 
 		return this;
 	};
