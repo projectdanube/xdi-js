@@ -1270,7 +1270,7 @@
 				stripXs: function(string) {
 
 					string = xdi.parser.stripPattern(string, /\([^\(\)]*\)/);
-					string = xdi.parser.stripPattern(string, /\{[^\(\)]*\}/);
+					string = xdi.parser.stripPattern(string, /\{[^\{\}]*\}/);
 					string = xdi.parser.stripPattern(string, /\"[^\"]*\"/);
 
 					return string;
