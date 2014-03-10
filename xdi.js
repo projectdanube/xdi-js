@@ -863,15 +863,15 @@
 
 			constants: {
 
-				cs_equals: '=',
-				cs_at: '@',
-				cs_plus: '+',
-				cs_dollar: '$',
-				cs_star: '*',
-				cs_bang: '!',
-				cs_order: '#',
+				cs_authority_personal: '=',
+				cs_authority_legal: '+',
+				cs_authority_general: '*',
+				cs_class_unreserved: '#',
+				cs_class_reserved: '$',
 				cs_value: '&',
-				cs_array: [ '=', '@', '+', '$', '*', '!', '#', '&' ],
+				cs_member_unordered: '!',
+				cs_member_ordered: '@',
+				cs_array: [ '=', '+', '*', '#', '$', '&', '!', '@' ],
 				xs_root: '()',
 				xs_variable: '{}',
 				xs_class: '[]',
@@ -891,7 +891,7 @@
 				xri_public_do: '$public$do',
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
-				uri_default_discovery_endpoint: 'http://xdidiscoveryservice.xdi.net:12220/'
+				uri_default_discovery_endpoint: 'http://mycloud.neustar.biz:12220/'
 			},
 
 			graph: function() {
@@ -1299,21 +1299,21 @@
 				isIri: function(string) {
 
 					var indexColon = string.indexOf(':');
-					var indexEquals = string.indexOf(xdi.constants.cs_equals);
-					var indexAt = string.indexOf(xdi.constants.cs_at);
-					var indexPlus = string.indexOf(xdi.constants.cs_plus);
-					var indexDollar = string.indexOf(xdi.constants.cs_dollar);
-					var indexStar = string.indexOf(xdi.constants.cs_star);
-					var indexBang = string.indexOf(xdi.constants.cs_bang);
+					var indexAuthorityPersonal = string.indexOf(xdi.constants.cs_authority_personal);
+					var indexAuthorityLegal = string.indexOf(xdi.constants.cs_authority_legal);
+					var indexAuthorityGeneral = string.indexOf(xdi.constants.cs_authority_general);
+					var indexClassUnreserved = string.indexOf(xdi.constants.cs_class_unreserved);
+					var indexClassReserved = string.indexOf(xdi.constants.cs_class_reserved);
+					var indexMemberUnordered = string.indexOf(xdi.constants.cs_member_unordered);
 
 					if (indexColon === -1) return false;
 
-					if (indexEquals !== -1 && indexEquals < indexColon) return false;
-					if (indexAt !== -1 && indexAt < indexColon) return false;
-					if (indexPlus !== -1 && indexPlus < indexColon) return false;
-					if (indexDollar !== -1 && indexDollar < indexColon) return false;
-					if (indexStar !== -1 && indexStar < indexColon) return false;
-					if (indexBang !== -1 && indexBang < indexColon) return false;
+					if (indexAuthorityPersonal !== -1 && indexAuthorityPersonal < indexColon) return false;
+					if (indexAuthorityLegal !== -1 && indexAuthorityLegal < indexColon) return false;
+					if (indexAuthorityGeneral !== -1 && indexAuthorityGeneral < indexColon) return false;
+					if (indexClassUnreserved !== -1 && indexClassUnreserved < indexColon) return false;
+					if (indexClassReserved !== -1 && indexClassReserved < indexColon) return false;
+					if (indexMemberUnordered !== -1 && indexMemberUnordered < indexColon) return false;
 
 					return true;
 				},
