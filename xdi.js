@@ -891,7 +891,7 @@
 				xri_public_do: '$public$do',
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
-				uri_default_discovery_endpoint: 'http://mycloud.neustar.biz:12220/'
+				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/'
 			},
 
 			graph: function() {
