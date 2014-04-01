@@ -40,7 +40,7 @@ alert(xdi.io.write(graph));
 var message = xdi.message("$anon");
 message.toAddress("([+]!:uuid:8888)");
 message.linkContract("$public$do");
-message.operation("$get", "[+]!:uuid:8888<+name>");
+message.operation("$get", "[+]!:uuid:8888<#name>");
 
 message.send(
 	"http://xdi.csp.org/myxdiendpoint",
