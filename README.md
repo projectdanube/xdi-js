@@ -11,7 +11,7 @@ A sample deployment of XDI-js is available at http://xdi-js.projectdanube.org.
 #### Parser
 
 ```
-var statement = xdi.parser.parseStatement('=markus<+email>&/&/"Markus"');
+var statement = xdi.parser.parseStatement('=markus<#email>&/&/"Markus"');
 for (var i in statement.subject().subsegments()) alert(statement.subject().subsegments()[i]);
 ```
 
@@ -19,12 +19,12 @@ for (var i in statement.subject().subsegments()) alert(statement.subject().subse
 
 ```
 var graph = xdi.graph();
-graph.root().context("=markus", true).context("<+email>", true).context("&", true).literal("markus.sabadello@gmail.com");
-graph.root().context("=markus", true).relation("+friend", "=joe", true);
-graph.root().context("=markus", true).relation("+friend", "=drummond", true);
-graph.root().context("=markus", true).context("<+first>", true).context("<+name>", true).context("&", true).literal("Markus");
-graph.statement("=markus<+last><+name>&/&/\"Sabadello\"");
-graph.statement("=x/+y/(=a/+b/=c)");
+graph.root().context("=markus", true).context("<#email>", true).context("&", true).literal("markus.sabadello@gmail.com");
+graph.root().context("=markus", true).relation("#friend", "=joe", true);
+graph.root().context("=markus", true).relation("#friend", "=drummond", true);
+graph.root().context("=markus", true).context("<#first>", true).context("<#name>", true).context("&", true).literal("Markus");
+graph.statement("=markus<#last><#name>&/&/\"Sabadello\"");
+graph.statement("=x/#y/(=a/#b/=c)");
 ```
 
 #### Serialization and Deserialization
@@ -38,9 +38,9 @@ alert(xdi.io.write(graph));
 
 ```
 var message = xdi.message("$anon");
-message.toAddress("([@]!:uuid:8888)");
+message.toAddress("([+]!:uuid:8888)");
 message.linkContract("$public$do");
-message.operation("$get", "[@]!:uuid:8888<+name>");
+message.operation("$get", "[+]!:uuid:8888<#name>");
 
 message.send(
 	"http://xdi.csp.org/myxdiendpoint",

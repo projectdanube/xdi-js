@@ -192,7 +192,7 @@ $(function() {
 </div>
 
 <div id="tabs-2">
-<input type="text" id="syntaxinput" size="50" value='[=]!1111[+address]!1<+street>&/&/"MyStreet123"'>
+<input type="text" id="syntaxinput" size="50" value='[=]!1111[#address]!1<#street>&/&/"MyStreet123"'>
 <button onclick="syntax();">Syntax</button>
 <button onclick="syntaxclear();">Clear</button>
 <div class="result" id="syntaxresult"></div>
@@ -201,12 +201,12 @@ $(function() {
 <div id="tabs-3">
 <textarea id="graphinput" cols="120" rows="8">
 var g = xdi.graph();
-g.root().context("=markus", true).context("<+email>", true).context("&", true).literal("markus.sabadello@gmail.com");
-g.root().context("=markus", true).relation("+friend", "=joe", true);
-g.root().context("=markus", true).relation("+friend", "=drummond", true);
-g.root().context("=markus", true).context("<+first>", true).context("<+name>", true).context("&", true).literal("Markus");
-g.statement("=markus<+last><+name>&/&/\"Sabadello\"");
-g.statement("=x/+y/(=a/+b/=c)");
+g.root().context("=markus", true).context("<#email>", true).context("&", true).literal("markus.sabadello@gmail.com");
+g.root().context("=markus", true).relation("#friend", "=joe", true);
+g.root().context("=markus", true).relation("#friend", "=drummond", true);
+g.root().context("=markus", true).context("<#first>", true).context("<#name>", true).context("&", true).literal("Markus");
+g.statement("=markus<#last><#name>&/&/\"Sabadello\"");
+g.statement("=x/#y/(=a/#b/=c)");
 </textarea>
 <button onclick="graph();">Graph</button>
 <button onclick="graphclear();">Clear</button>
@@ -216,12 +216,12 @@ g.statement("=x/+y/(=a/+b/=c)");
 
 <div id="tabs-4">
 <textarea id="convertinput" cols="120" rows="8">
-=x/+y/(=a/+b/=c)
-=markus/+friend/=drummond
-=markus/+friend/=joe
-=markus<+email>&/&/"markus.sabadello@gmail.com"
-=markus<+first><+name>&/&/"Markus"
-=markus<+last><+name>&/&/"Sabadello"
+=x/#y/(=a/#b/=c)
+=markus/#friend/=drummond
+=markus/#friend/=joe
+=markus<#email>&/&/"markus.sabadello@gmail.com"
+=markus<#first><#name>&/&/"Markus"
+=markus<#last><#name>&/&/"Sabadello"
 </textarea>
 <button onclick="convert1();">XDI DISPLAY -> XDI JSON</button>
 <button onclick="convert2();">XDI JSON -> XDI DISPLAY</button>
@@ -231,7 +231,7 @@ g.statement("=x/+y/(=a/+b/=c)");
 
 <div id="tabs-5">
 <p><input type="text" id="clientinput" size="50" value='http://mycloud.neustar.biz:14440/users/%5B%40%5D%21%3Auuid%3Ae0178407-b7b6-43f9-e017-8407b7b643f9'></p>
-<p><input type="text" id="clientinput2" size="50" value='([@]!:uuid:e0178407-b7b6-43f9-e017-8407b7b643f9)'></p>
+<p><input type="text" id="clientinput2" size="50" value='([+]!:uuid:e0178407-b7b6-43f9-e017-8407b7b643f9)'></p>
 <p><input type="text" id="clientinput3" size="50" value='$anon'></p>
 <p><input type="text" id="clientinput4" size="50" value='$public$do'></p>
 <p>
@@ -239,14 +239,14 @@ g.statement("=x/+y/(=a/+b/=c)");
 <input type="radio" name="clientinput5" value="$set">&nbsp;$set
 <input type="radio" name="clientinput5" value="$del">&nbsp;$del
 </p>
-<p><input type="text" id="clientinput6" size="50" value='@acmebread<+name>'></p>
+<p><input type="text" id="clientinput6" size="50" value='+acmebread<#name>'></p>
 <button onclick="client();">Send</button>
 <button onclick="clientclear();">Clear</button>
 <div class="result" id="clientresult"></div>
 </div>
 
 <div id="tabs-6">
-<input type="text" id="discoveryinput" size="50" value='@acmebread'>
+<input type="text" id="discoveryinput" size="50" value='+acmebread'>
 <button onclick="discover1();">From PROD</button>
 <button onclick="discover2();">From OTE</button>
 <button onclick="discoveryclear();">Clear</button>
