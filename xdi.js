@@ -67,7 +67,10 @@
 
 		if (! this.isRelationStatement()) return null;
 
-		var innerrootnotationxref = this.object().subsegments()[0].xref();
+		var innerrootnotationobjectsubsegments = this.object().subsegments();
+		if (innerrootnotationobjectsubsegments.length === 0) return null;
+
+		var innerrootnotationxref = innerrootnotationobjectsubsegments[0].xref();
 		if (innerrootnotationxref === null) return null;
 
 		var innerrootnotationstatement = innerrootnotationxref.statement();
