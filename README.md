@@ -57,7 +57,7 @@ message.send(
 
 ```
 xdi.discovery(
-	"@acmebread",
+	"+acmebread",
 	function(discovery) {
 		alert(discovery.cloudNumber());
 		alert(discovery.xdiEndpoint());
