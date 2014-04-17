@@ -1,7 +1,7 @@
 (function (window) {
 
 	//
-	// VERSION: 0.1-SNAPSHOT
+	// VERSION: 0.1
 	//
 
 	'use strict';
