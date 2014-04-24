@@ -61,6 +61,7 @@ xdi.discovery(
 	function(discovery) {
 		alert(discovery.cloudNumber());
 		alert(discovery.xdiEndpoint());
+		alert(discovery.services());
 	},
 	function(errorText) {							// OPTIONAL
 		alert(errorText);
