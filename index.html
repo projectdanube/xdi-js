@@ -4,9 +4,11 @@
 
 <title>xdi-js</title>
 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
 <link rel="shortcut icon" href="favicon.ico" />
 
-<link rel="stylesheet" href="css/style.css" TYPE="text/css" MEDIA="screen">
+<link rel="stylesheet" href="css/style.css" TYPE="text/css" MEDIA="screen" />
 <link rel="stylesheet" href="css/jquery-ui-1.10.3.custom.min.css" />
 
 <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
@@ -122,6 +124,7 @@ function clientclear() {
 function discover1() {
 
 	var xri = $("#discoveryinput").val();
+	var serviceTypes = $("#discoveryinput2").val();
 
 	xdi.discovery(
 
@@ -130,11 +133,14 @@ function discover1() {
 			$("#discoveryresult").html("");
 			$("#discoveryresult").append("<p class='segment'>CLOUD NUMBER: " + discovery.cloudNumber() + "</p>");
 			$("#discoveryresult").append("<p class='segment'>XDI ENDPOINT: " + discovery.xdiEndpoint() + "</p>");
+			for (var i in discovery.services()) {
+				$("#discoveryresult").append("<p class='segment'>SERVICE: " + i + " --> " + discovery.services()[i] + "</p>");
+			}
 		},
 		function(errorText) {
 			alert(errorText);
 		},
-		[],
+		serviceTypes ? serviceTypes.split(" ") : [],
 		"https://xdidiscoveryservice.xdi.net/"
 	);
 }
@@ -142,6 +148,7 @@ function discover1() {
 function discover2() {
 
 	var xri = $("#discoveryinput").val();
+	var serviceTypes = $("#discoveryinput2").val();
 
 	xdi.discovery(
 
@@ -150,11 +157,14 @@ function discover2() {
 			$("#discoveryresult").html("");
 			$("#discoveryresult").append("<p class='segment'>CLOUD NUMBER: " + discovery.cloudNumber() + "</p>");
 			$("#discoveryresult").append("<p class='segment'>XDI ENDPOINT: " + discovery.xdiEndpoint() + "</p>");
+			for (var i in discovery.services()) {
+				$("#discoveryresult").append("<p class='segment'>SERVICE: " + i + " --> " + discovery.services()[i] + "</p>");
+			}
 		},
 		function(errorText) {
 			alert(errorText);
 		},
-		[],
+		serviceTypes ? serviceTypes.split(" ") : [],
 		"https://xdidiscoveryserviceote.xdi.net/"
 	);
 }
@@ -232,23 +242,24 @@ g.statement("=x/#y/(=a/#b/=c)");
 </div>
 
 <div id="tabs-5">
-<p><input type="text" id="clientinput" size="50" value='http://mycloud.neustar.biz:14440/users/%5B%40%5D%21%3Auuid%3Ae0178407-b7b6-43f9-e017-8407b7b643f9'></p>
-<p><input type="text" id="clientinput2" size="50" value='([+]!:uuid:e0178407-b7b6-43f9-e017-8407b7b643f9)'></p>
-<p><input type="text" id="clientinput3" size="50" value='$anon'></p>
-<p><input type="text" id="clientinput4" size="50" value='$public$do'></p>
+<p><input type="text" id="clientinput" size="50" value='http://mycloud.neustar.biz:14440/users/%5B%40%5D%21%3Auuid%3Ae0178407-b7b6-43f9-e017-8407b7b643f9'>&nbsp;endpoint</p>
+<p><input type="text" id="clientinput2" size="50" value='([+]!:uuid:e0178407-b7b6-43f9-e017-8407b7b643f9)'>&nbsp;recipient peer root</p>
+<p><input type="text" id="clientinput3" size="50" value='$anon'>&nbsp;sender</p>
+<p><input type="text" id="clientinput4" size="50" value='$public$do'>&nbsp;link contract</p>
 <p>
 <input type="radio" name="clientinput5" value="$get" checked>&nbsp;$get
 <input type="radio" name="clientinput5" value="$set">&nbsp;$set
 <input type="radio" name="clientinput5" value="$del">&nbsp;$del
 </p>
-<p><input type="text" id="clientinput6" size="50" value='+acmebread<#name>'></p>
+<p><input type="text" id="clientinput6" size="50" value='=alice<#name>'>&nbsp;target</p>
 <button onclick="client();">Send</button>
 <button onclick="clientclear();">Clear</button>
 <div class="result" id="clientresult"></div>
 </div>
 
 <div id="tabs-6">
-<input type="text" id="discoveryinput" size="50" value='+acmebread'>
+<p><input type="text" id="discoveryinput" size="50" value='=alice'>&nbsp;cloud name / cloud number</p>
+<p><input type="text" id="discoveryinput2" size="50" value='<$https><$connect><$xdi>'>&nbsp;services</p>
 <button onclick="discover1();">From PROD</button>
 <button onclick="discover2();">From OTE</button>
 <button onclick="discoveryclear();">Clear</button>

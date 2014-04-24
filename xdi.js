@@ -836,13 +836,14 @@
 	 * Discovery class
 	 */
 
-	function Discovery(cloudNumber, xdiEndpoint, response) {
+	function Discovery(cloudNumber, xdiEndpoint, response, services) {
 
 		if (! (this instanceof Discovery)) return new Discovery();
 
 		this._cloudNumber = cloudNumber;
 		this._xdiEndpoint = xdiEndpoint;
 		this._response = response;
+		this._services = services;
 	}
 
 	Discovery.prototype.cloudNumber = function() {
@@ -858,6 +859,11 @@
 	Discovery.prototype.response = function() {
 
 		return this._response;
+	};
+
+	Discovery.prototype.services = function() {
+
+		return this._services;
 	};
 
 	/*
@@ -895,7 +901,7 @@
 				xri_rep: '$rep',
 				xri_secret_token: '<$secret><$token>&',
 				xri_do: '$do',
-				xri_public_do: '$public$do',
+				xri_uri: '<$uri>',
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
 				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/'
@@ -916,13 +922,14 @@
 				return xdi.messageEnvelope().message(sender);
 			},
 
-			discovery: function(target, success, error, endpoint) {
+			discovery: function(target, success, error, serviceTypes, endpoint) {
 
+				serviceTypes = serviceTypes || [];
 				endpoint = endpoint || xdi.constants.uri_default_discovery_endpoint;
 
 				var message = xdi.message();
-				message.operation('$get', '(' + target + ')');
 				message.linkContract(xdi.constants.xri_public_do);
+				message.operation('$get', '(' + target + ')');
 
 				message.send(
 
@@ -965,7 +972,42 @@
 
 							var xdiEndpoint = xdiEndpointContext.context(xdi.constants.xri_value).literal().data();
 
-							success(new Discovery(cloudNumber, xdiEndpoint, response));
+							if (serviceTypes.length === 0) {
+
+								success(new Discovery(cloudNumber, xdiEndpoint, response, {}));
+							} else {
+
+								var message2 = xdi.message();
+								message2.toAddress('(' + cloudNumber + ')');
+								message2.linkContract(cloudNumber + '$to' + '$anon' + '$from' + '$public' + '$do');
+
+								for (var i in serviceTypes) {
+							
+									message2.operation('$get', cloudNumber + serviceTypes[i] + xdi.constants.xri_uri);
+								}
+
+								message2.send(
+				
+									xdiEndpoint, 
+									function(response) {
+									
+										var services = {};
+										
+										for (var i in serviceTypes) {
+				
+											var serviceEndpointContext = response.root().context(cloudNumber + serviceTypes[i] + xdi.constants.xri_uri);
+											if (serviceEndpointContext === null) continue;
+				
+											serviceEndpointContext = serviceEndpointContext.dereference();
+											var serviceEndpoint = serviceEndpointContext.context(xdi.constants.xri_value).literal().data();
+
+											services[serviceTypes[i]] = serviceEndpoint;
+										}
+									
+										success(new Discovery(cloudNumber, xdiEndpoint, response, services));
+									},
+									error);
+							}
 						}, 
 						error);
 			},
