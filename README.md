@@ -47,7 +47,7 @@ message.send(
 	function(response) {
 		alert(xdi.io.write(response));
 	},
-	function(errorText) {
+	function(errorText) {							// OPTIONAL
 		alert(errorText);
 	}
 );
@@ -62,9 +62,11 @@ xdi.discovery(
 		alert(discovery.cloudNumber());
 		alert(discovery.xdiEndpoint());
 	},
-	function(errorText) {
+	function(errorText) {							// OPTIONAL
 		alert(errorText);
-	}
+	},
+	['<$https><$connect><$xdi>'],					// OPTIONAL
+	'https://xdidiscoveryserviceote.xdi.net/'		// OPTIONAL
 );
 ```
 
