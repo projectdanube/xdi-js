@@ -4,9 +4,11 @@
 
 <title>xdi-js</title>
 
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
 <link rel="shortcut icon" href="favicon.ico" />
 
-<link rel="stylesheet" href="css/style.css" TYPE="text/css" MEDIA="screen">
+<link rel="stylesheet" href="css/style.css" TYPE="text/css" MEDIA="screen" />
 <link rel="stylesheet" href="css/jquery-ui-1.10.3.custom.min.css" />
 
 <script type="text/javascript" src="js/jquery-2.0.3.min.js"></script>
@@ -122,6 +124,7 @@ function clientclear() {
 function discover1() {
 
 	var xri = $("#discoveryinput").val();
+	var serviceTypes = $("#discoveryinput2").val();
 
 	xdi.discovery(
 
@@ -130,17 +133,22 @@ function discover1() {
 			$("#discoveryresult").html("");
 			$("#discoveryresult").append("<p class='segment'>CLOUD NUMBER: " + discovery.cloudNumber() + "</p>");
 			$("#discoveryresult").append("<p class='segment'>XDI ENDPOINT: " + discovery.xdiEndpoint() + "</p>");
+			for (var i in discovery.services()) {
+				$("#discoveryresult").append("<p class='segment'>SERVICE: " + i + " --> " + discovery.services()[i] + "</p>");
+			}
 		},
 		function(errorText) {
 			alert(errorText);
 		},
-		"http://xdidiscoveryservice.xdi.net:12220/"
+		serviceTypes ? serviceTypes.split(" ") : [],
+		"https://xdidiscoveryservice.xdi.net/"
 	);
 }
 
 function discover2() {
 
 	var xri = $("#discoveryinput").val();
+	var serviceTypes = $("#discoveryinput2").val();
 
 	xdi.discovery(
 
@@ -149,11 +157,15 @@ function discover2() {
 			$("#discoveryresult").html("");
 			$("#discoveryresult").append("<p class='segment'>CLOUD NUMBER: " + discovery.cloudNumber() + "</p>");
 			$("#discoveryresult").append("<p class='segment'>XDI ENDPOINT: " + discovery.xdiEndpoint() + "</p>");
+			for (var i in discovery.services()) {
+				$("#discoveryresult").append("<p class='segment'>SERVICE: " + i + " --> " + discovery.services()[i] + "</p>");
+			}
 		},
 		function(errorText) {
 			alert(errorText);
 		},
-		"http://xdidiscoveryserviceote.xdi.net:12220/"
+		serviceTypes ? serviceTypes.split(" ") : [],
+		"https://xdidiscoveryserviceote.xdi.net/"
 	);
 }
 
@@ -192,7 +204,7 @@ $(function() {
 </div>
 
 <div id="tabs-2">
-<input type="text" id="syntaxinput" size="50" value='[=]!1111[+address]!1<+street>&/&/"MyStreet123"'>
+<input type="text" id="syntaxinput" size="50" value='[=]!1111[#address]!1<#street>&/&/"MyStreet123"'>
 <button onclick="syntax();">Syntax</button>
 <button onclick="syntaxclear();">Clear</button>
 <div class="result" id="syntaxresult"></div>
@@ -201,12 +213,12 @@ $(function() {
 <div id="tabs-3">
 <textarea id="graphinput" cols="120" rows="8">
 var g = xdi.graph();
-g.root().context("=markus", true).context("<+email>", true).context("&", true).literal("markus.sabadello@gmail.com");
-g.root().context("=markus", true).relation("+friend", "=joe", true);
-g.root().context("=markus", true).relation("+friend", "=drummond", true);
-g.root().context("=markus", true).context("<+first>", true).context("<+name>", true).context("&", true).literal("Markus");
-g.statement("=markus<+last><+name>&/&/\"Sabadello\"");
-g.statement("=x/+y/(=a/+b/=c)");
+g.root().context("=markus", true).context("<#email>", true).context("&", true).literal("markus.sabadello@gmail.com");
+g.root().context("=markus", true).relation("#friend", "=joe", true);
+g.root().context("=markus", true).relation("#friend", "=drummond", true);
+g.root().context("=markus", true).context("<#first>", true).context("<#name>", true).context("&", true).literal("Markus");
+g.statement("=markus<#last><#name>&/&/\"Sabadello\"");
+g.statement("=x/#y/(=a/#b/=c)");
 </textarea>
 <button onclick="graph();">Graph</button>
 <button onclick="graphclear();">Clear</button>
@@ -216,12 +228,12 @@ g.statement("=x/+y/(=a/+b/=c)");
 
 <div id="tabs-4">
 <textarea id="convertinput" cols="120" rows="8">
-=x/+y/(=a/+b/=c)
-=markus/+friend/=drummond
-=markus/+friend/=joe
-=markus<+email>&/&/"markus.sabadello@gmail.com"
-=markus<+first><+name>&/&/"Markus"
-=markus<+last><+name>&/&/"Sabadello"
+=x/#y/(=a/#b/=c)
+=markus/#friend/=drummond
+=markus/#friend/=joe
+=markus<#email>&/&/"markus.sabadello@gmail.com"
+=markus<#first><#name>&/&/"Markus"
+=markus<#last><#name>&/&/"Sabadello"
 </textarea>
 <button onclick="convert1();">XDI DISPLAY -> XDI JSON</button>
 <button onclick="convert2();">XDI JSON -> XDI DISPLAY</button>
@@ -246,7 +258,8 @@ g.statement("=x/+y/(=a/+b/=c)");
 </div>
 
 <div id="tabs-6">
-<input type="text" id="discoveryinput" size="50" value='@acmebread'>
+<p><input type="text" id="discoveryinput" size="50" value='=alice'>&nbsp;cloud name / cloud number</p>
+<p><input type="text" id="discoveryinput2" size="50" value='<$https><$connect><$xdi>'>&nbsp;services</p>
 <button onclick="discover1();">From PROD</button>
 <button onclick="discover2();">From OTE</button>
 <button onclick="discoveryclear();">Clear</button>

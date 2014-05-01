@@ -1,5 +1,9 @@
 (function (window) {
 
+	//
+	// VERSION: 0.3-SNAPSHOT
+	//
+
 	'use strict';
 
 	/*
@@ -63,7 +67,10 @@
 
 		if (! this.isRelationStatement()) return null;
 
-		var innerrootnotationxref = this.object().subsegments()[0].xref();
+		var innerrootnotationobjectsubsegments = this.object().subsegments();
+		if (innerrootnotationobjectsubsegments.length === 0) return null;
+
+		var innerrootnotationxref = innerrootnotationobjectsubsegments[0].xref();
 		if (innerrootnotationxref === null) return null;
 
 		var innerrootnotationstatement = innerrootnotationxref.statement();
@@ -829,13 +836,14 @@
 	 * Discovery class
 	 */
 
-	function Discovery(cloudNumber, xdiEndpoint, response) {
+	function Discovery(cloudNumber, xdiEndpoint, response, services) {
 
 		if (! (this instanceof Discovery)) return new Discovery();
 
 		this._cloudNumber = cloudNumber;
 		this._xdiEndpoint = xdiEndpoint;
 		this._response = response;
+		this._services = services;
 	}
 
 	Discovery.prototype.cloudNumber = function() {
@@ -853,6 +861,11 @@
 		return this._response;
 	};
 
+	Discovery.prototype.services = function() {
+
+		return this._services;
+	};
+
 	/*
 	 * Library object
 	 */
@@ -863,15 +876,15 @@
 
 			constants: {
 
-				cs_equals: '=',
-				cs_at: '@',
-				cs_plus: '+',
-				cs_dollar: '$',
-				cs_star: '*',
-				cs_bang: '!',
-				cs_order: '#',
+				cs_authority_personal: '=',
+				cs_authority_legal: '+',
+				cs_authority_general: '*',
+				cs_class_unreserved: '#',
+				cs_class_reserved: '$',
 				cs_value: '&',
-				cs_array: [ '=', '@', '+', '$', '*', '!', '#', '&' ],
+				cs_member_unordered: '!',
+				cs_member_ordered: '@',
+				cs_array: [ '=', '+', '*', '#', '$', '&', '!', '@' ],
 				xs_root: '()',
 				xs_variable: '{}',
 				xs_class: '[]',
@@ -888,10 +901,10 @@
 				xri_rep: '$rep',
 				xri_secret_token: '<$secret><$token>&',
 				xri_do: '$do',
-				xri_public_do: '$public$do',
+				xri_uri: '<$uri>',
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
-				uri_default_discovery_endpoint: 'http://xdidiscoveryservice.xdi.net:12220/'
+				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/'
 			},
 
 			graph: function() {
@@ -909,13 +922,14 @@
 				return xdi.messageEnvelope().message(sender);
 			},
 
-			discovery: function(target, success, error, endpoint) {
+			discovery: function(target, success, error, serviceTypes, endpoint) {
 
+				serviceTypes = serviceTypes || [];
 				endpoint = endpoint || xdi.constants.uri_default_discovery_endpoint;
 
 				var message = xdi.message();
-				message.operation('$get', '(' + target + ')');
 				message.linkContract(xdi.constants.xri_public_do);
+				message.operation('$get', '(' + target + ')');
 
 				message.send(
 
@@ -958,7 +972,42 @@
 
 							var xdiEndpoint = xdiEndpointContext.context(xdi.constants.xri_value).literal().data();
 
-							success(new Discovery(cloudNumber, xdiEndpoint, response));
+							if (serviceTypes.length === 0) {
+
+								success(new Discovery(cloudNumber, xdiEndpoint, response, {}));
+							} else {
+
+								var message2 = xdi.message();
+								message2.toAddress('(' + cloudNumber + ')');
+								message2.linkContract(cloudNumber + '$to' + '$anon' + '$from' + '$public' + '$do');
+
+								for (var i in serviceTypes) {
+							
+									message2.operation('$get', cloudNumber + serviceTypes[i] + xdi.constants.xri_uri);
+								}
+
+								message2.send(
+				
+									xdiEndpoint, 
+									function(response) {
+									
+										var services = {};
+										
+										for (var i in serviceTypes) {
+				
+											var serviceEndpointContext = response.root().context(cloudNumber + serviceTypes[i] + xdi.constants.xri_uri);
+											if (serviceEndpointContext === null) continue;
+				
+											serviceEndpointContext = serviceEndpointContext.dereference();
+											var serviceEndpoint = serviceEndpointContext.context(xdi.constants.xri_value).literal().data();
+
+											services[serviceTypes[i]] = serviceEndpoint;
+										}
+									
+										success(new Discovery(cloudNumber, xdiEndpoint, response, services));
+									},
+									error);
+							}
 						}, 
 						error);
 			},
@@ -1299,21 +1348,21 @@
 				isIri: function(string) {
 
 					var indexColon = string.indexOf(':');
-					var indexEquals = string.indexOf(xdi.constants.cs_equals);
-					var indexAt = string.indexOf(xdi.constants.cs_at);
-					var indexPlus = string.indexOf(xdi.constants.cs_plus);
-					var indexDollar = string.indexOf(xdi.constants.cs_dollar);
-					var indexStar = string.indexOf(xdi.constants.cs_star);
-					var indexBang = string.indexOf(xdi.constants.cs_bang);
+					var indexAuthorityPersonal = string.indexOf(xdi.constants.cs_authority_personal);
+					var indexAuthorityLegal = string.indexOf(xdi.constants.cs_authority_legal);
+					var indexAuthorityGeneral = string.indexOf(xdi.constants.cs_authority_general);
+					var indexClassUnreserved = string.indexOf(xdi.constants.cs_class_unreserved);
+					var indexClassReserved = string.indexOf(xdi.constants.cs_class_reserved);
+					var indexMemberUnordered = string.indexOf(xdi.constants.cs_member_unordered);
 
 					if (indexColon === -1) return false;
 
-					if (indexEquals !== -1 && indexEquals < indexColon) return false;
-					if (indexAt !== -1 && indexAt < indexColon) return false;
-					if (indexPlus !== -1 && indexPlus < indexColon) return false;
-					if (indexDollar !== -1 && indexDollar < indexColon) return false;
-					if (indexStar !== -1 && indexStar < indexColon) return false;
-					if (indexBang !== -1 && indexBang < indexColon) return false;
+					if (indexAuthorityPersonal !== -1 && indexAuthorityPersonal < indexColon) return false;
+					if (indexAuthorityLegal !== -1 && indexAuthorityLegal < indexColon) return false;
+					if (indexAuthorityGeneral !== -1 && indexAuthorityGeneral < indexColon) return false;
+					if (indexClassUnreserved !== -1 && indexClassUnreserved < indexColon) return false;
+					if (indexClassReserved !== -1 && indexClassReserved < indexColon) return false;
+					if (indexMemberUnordered !== -1 && indexMemberUnordered < indexColon) return false;
 
 					return true;
 				},
