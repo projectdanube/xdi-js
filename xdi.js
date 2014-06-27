@@ -904,7 +904,15 @@
 				xri_uri: '<$uri>',
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
-				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/'
+				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/',
+                                nodetypes: {
+                                    LITERAL: "literal",
+                                    CONTEXT: "context",
+                                    ROOT:"root",
+                                    ENTITY:"entity",
+                                    ATTRIBUTE:"attribute",
+                                    VALUE:"value"
+                                }
 			},
 
 			graph: function() {
@@ -1050,7 +1058,19 @@
 					var s4 = function() { return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1); };
 
 					return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-				}
+				},
+
+                                getNodeType: function(nodelabel) {
+                                    if ((nodelabel === "") || (nodelabel.match(/^\(.*\)$/) != null))
+                                        return xdi.constants.nodetypes.ROOT;
+                                    if(nodelabel.match(/^".*"$/) != null)
+                                        return xdi.constants.nodetypes.LITERAL;
+                                    if(nodelabel.slice(-1) === "&")
+                                        return xdi.constants.nodetypes.VALUE;
+                                    if(nodelabel.match(/^<.*>$/) != null)
+                                        return xdi.constants.nodetypes.ATTRIBUTE;
+                                    return xdi.constants.nodetypes.ENTITY;
+                                }
 			},
 
 			io: {
