@@ -787,7 +787,7 @@
 		var request = new XMLHttpRequest();
 		request.open('POST', endpoint, true);
 		request.setRequestHeader('Content-Type', 'text/xdi');
-		request.setRequestHeader('Accept', 'text/xdi');
+		request.setRequestHeader('Accept', 'text/xdi;inner=0');
 
 		request.onreadystatechange = function() {
 
