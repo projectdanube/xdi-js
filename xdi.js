@@ -895,6 +895,7 @@
 				xri_literal: '&',
 				xri_variable: '{}',
 				xri_anon: '$anon',
+				xri_public: '$public',
 				xri_msg: '$msg',
 				xri_is_context: '$is()',
 				xri_ref: '$ref',
@@ -936,7 +937,6 @@
 				endpoint = endpoint || xdi.constants.uri_default_discovery_endpoint;
 
 				var message = xdi.message();
-				message.linkContract(xdi.constants.xri_public_do);
 				message.operation('$get', '(' + target + ')');
 
 				message.send(
@@ -987,7 +987,7 @@
 
 								var message2 = xdi.message();
 								message2.toAddress('(' + cloudNumber + ')');
-								message2.linkContract(cloudNumber + '$to' + '$anon' + '$from' + '$public' + '$do');
+								message2.linkContract('(' + cloudNumber + '/' + xdi.constants.xri_public + ')' + '$do');
 
 								for (var i in serviceTypes) {
 							
