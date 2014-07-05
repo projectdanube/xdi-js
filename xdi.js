@@ -63,51 +63,6 @@
 		return this.predicate().string() === xdi.constants.xri_literal;
 	};
 
-	Statement.prototype.innerRootNotationStatement = function() {
-
-		if (! this.isRelationStatement()) return null;
-
-		var innerrootnotationobjectsubsegments = this.object().subsegments();
-		if (innerrootnotationobjectsubsegments.length === 0) return null;
-
-		var innerrootnotationxref = innerrootnotationobjectsubsegments[0].xref();
-		if (innerrootnotationxref === null) return null;
-
-		var innerrootnotationstatement = innerrootnotationxref.statement();
-		if (innerrootnotationstatement === null) return null;
-
-		return innerrootnotationstatement;
-	};
-
-	Statement.prototype.isInnerRootNotation = function() {
-
-		return this.innerRootNotationStatement() !== null;
-	};
-
-	Statement.prototype.fromInnerRootNotation = function() {
-
-		var innerrootnotationstatement = this.innerRootNotationStatement();
-		if (innerrootnotationstatement === null) return this;
-
-		if (innerrootnotationstatement.isInnerRootNotation()) {
-
-			throw 'Not implemented';
-		} else {
-
-			var innerrootsubsegment = new Subsegment(null, null, false, false, null, new Xref(null, xdi.constants.xs_root, null, null, this.subject(), this.predicate(), null, null));
-			var innerrootsegment = new Segment(null, [ innerrootsubsegment ]);
-
-			var statement = xdi.util.concatStatement(innerrootsegment, innerrootnotationstatement, true);
-
-			return statement;
-		}
-	};
-
-	Statement.prototype.toInnerRootNotation = function() {
-
-		throw 'Not implemented';
-	};
-
 	function Segment(string, subsegments) {
 
 		if (! (this instanceof Segment)) return new Segment(string, subsegments);
@@ -186,14 +141,13 @@
 		return this._xref;
 	};
 
-	function Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal) {
+	function Xref(string, xs, segment, partialsubject, partialpredicate, iri, literal) {
 
-		if (! (this instanceof Xref)) return new Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal);
+		if (! (this instanceof Xref)) return new Xref(string, xs, segment, partialsubject, partialpredicate, iri, literal);
 
 		this._string = string;
 		this._xs = xs;
 		this._segment = segment;
-		this._statement = statement;
 		this._partialsubject = partialsubject;
 		this._partialpredicate = partialpredicate;
 		this._iri = iri;
@@ -204,7 +158,6 @@
 			this._string = '';
 			if (this._xs !== null) this._string += this._xs.charAt(0);
 			if (this._segment) this._string += this._segment.string();
-			if (this._statement) this._string += this._statement.string();
 			if (this._partialsubject !== null && this._partialpredicate !== null) this._string += this._partialsubject.string() + '/' + this._partialpredicate.string();
 			if (this._iri) this._string += this._iri;
 			if (this._literal) this._string += this._literal;
@@ -225,11 +178,6 @@
 	Xref.prototype.segment = function() {
 
 		return this._segment;
-	};
-
-	Xref.prototype.statement = function() {
-
-		return this._statement;
 	};
 
 	Xref.prototype.partialsubject = function() {
@@ -276,8 +224,6 @@
 	Graph.prototype.statement = function(statement) {
 
 		statement = statement instanceof Statement ? statement : xdi.parser.parseStatement(statement);
-
-		statement = statement.fromInnerRootNotation(statement);
 
 		var context = (statement.subject().string() === xdi.constants.xri_root) ? this._root : this._root.context(statement.subject().string(), true);
 
@@ -765,8 +711,7 @@
 			
 			var innerRoot = xdi.parser.parseSegment("(" + this._operationsContext.xri().string() + "/" + operation.string() + ")");
 			
-			target = target.fromInnerRootNotation();
-			target = xdi.util.concatStatement(innerRoot, target, true);
+			target = xdi.util.concatStatement(innerRoot, target);
 
 			this._operationsContext.graph().statement(target);
 		} else if (target instanceof Segment) {
@@ -787,7 +732,7 @@
 		var request = new XMLHttpRequest();
 		request.open('POST', endpoint, true);
 		request.setRequestHeader('Content-Type', 'text/xdi');
-		request.setRequestHeader('Accept', 'text/xdi;inner=0');
+		request.setRequestHeader('Accept', 'text/xdi');
 
 		request.onreadystatechange = function() {
 
@@ -1033,22 +978,11 @@
 					return xdi.parser.parseSegment(buffer);
 				},
 
-				concatStatement: function(segment, statement, concatTargetContextNodeXri) {
-
-					if (statement.isInnerRootNotation()) throw 'Cannot concat statement in inner root notation.';
+				concatStatement: function(segment, statement) {
 
 					var subject = xdi.util.concatSegments(segment, statement.subject());
 					var predicate = statement.predicate();
-
-					var object;
-
-					if (statement.isRelationStatement() && concatTargetContextNodeXri) {
-
-						object = xdi.util.concatSegments(segment, statement.object());
-					} else {
-
-						object = statement.object();
-					}
+					var object = statement.object();
 
 					return new Statement(null, subject, predicate, object);
 				},
@@ -1263,14 +1197,13 @@
 					var xs = xdi.parser.xs(string.charAt(0));
 					if (xs === null) throw 'Invalid cross reference: ' + string + ' (no opening delimiter)';
 					if (string.charAt(string.length - 1) !== xs.charAt(1)) throw 'Invalid cross reference: ' + string + ' (invalid closing "' + xs.charAt(1) + '" delimiter)';
-					if (string.length === 2) return new Xref(string, xs, null, null, null, null, null, null);
+					if (string.length === 2) return new Xref(string, xs, null, null, null, null, null);
 
 					var value = string.substring(1, string.length - 1);
 
 					var temp = xdi.parser.stripXs(value);
 
 					var segment = null;
-					var statement = null;
 					var partialsubject = null;
 					var partialpredicate = null;
 					var iri = null;
@@ -1283,10 +1216,7 @@
 
 						var segments = temp.split('/').length;
 
-						if (segments === 3) {
-
-							statement = xdi.parser.parseStatement(value);
-						} else if (segments === 2) {
+						if (segments === 2) {
 
 							var parts = temp.split('/');
 							var split0 = parts[0].length;
@@ -1304,7 +1234,7 @@
 
 					// done
 
-					return new Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal);
+					return new Xref(string, xs, segment, partialsubject, partialpredicate, iri, literal);
 				},
 
 				cs: function(char) {
