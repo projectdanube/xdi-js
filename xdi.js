@@ -995,15 +995,17 @@
 				},
 
 				getNodeType: function(nodelabel) {
+
 					if ((nodelabel === "") || (nodelabel.match(/^\(.*\)$/) != null))
 						return xdi.constants.nodetypes.ROOT;
-					if(nodelabel.match(/^".*"$/) != null)
+					else if (nodelabel.match(/^".*"$/) != null)
 						return xdi.constants.nodetypes.LITERAL;
-					if(nodelabel.slice(-1) === "&")
+					else if (nodelabel.slice(-1) === "&")
 						return xdi.constants.nodetypes.VALUE;
-					if(nodelabel.match(/^<.*>$/) != null)
+					else if (nodelabel.match(/^<.*>$/) != null)
 						return xdi.constants.nodetypes.ATTRIBUTE;
-					return xdi.constants.nodetypes.ENTITY;
+					else
+						return xdi.constants.nodetypes.ENTITY;
 				}
 			},
 
