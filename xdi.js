@@ -263,12 +263,25 @@
 	
 			for (var i in contexts) {
 
-				var index = context.xri().string() + '/';
-	
-				if (typeof object[index] === 'undefined') object[index] = new Array();
-				object[index].push(contexts[i].arc().string());
+				if (contexts[i].arc()._xref !== null && contexts[i].arc()._xref._partialsubject !== null) {
+				
+					var index = contexts[i].arc()._xref._partialsubject.string() + '/' + contexts[i].arc()._xref._partialpredicate.string();
 
-				process(contexts[i], object);
+					var innerobject = new Object();
+		
+					if (typeof object[index] === 'undefined') object[index] = new Array();
+					object[index].push(innerobject);
+	
+					process(contexts[i], innerobject);
+				} else {
+
+					var index = context.xri().string() + '/';
+		
+					if (typeof object[index] === 'undefined') object[index] = new Array();
+					object[index].push(contexts[i].arc().string());
+	
+					process(contexts[i], object);
+				}
 			}
 	
 			for (var i in relations) {
@@ -985,6 +998,20 @@
 					var object = statement.object();
 
 					return new Statement(null, subject, predicate, object);
+				},
+
+				parentSegment: function(segment) {
+				
+					var subsegments = segment._subsegments.slice(0, -1);
+					
+					return new Segment(null, subsegments);
+				},
+
+				localSegment: function(segment) {
+				
+					var subsegments = segment._subsegments.slice(1);
+					
+					return new Segment(null, subsegments);
 				},
 
 				guid: function() {
