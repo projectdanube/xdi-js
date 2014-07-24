@@ -225,7 +225,7 @@
 
 		statement = statement instanceof Statement ? statement : xdi.parser.parseStatement(statement);
 
-		var context = (statement.subject().string() === xdi.constants.xri_root) ? this._root : this._root.context(statement.subject().string(), true);
+		var context = (statement.subject().string() === xdi.constants.xri_root) ? this._root : this._root.context(statement.subject(), true);
 
 		if (statement.isContextNodeStatement()) context.context(statement.object().string(), true);
 		else if (statement.isLiteralStatement()) context.literal(statement.object());
@@ -255,38 +255,41 @@
 
 	Graph.prototype.serializeXDIJSON = function(pretty) {
 
-		var process = function(context, object) {
+		var process = function(context, object, inner) {
 
 			var contexts = context.contexts();
 			var relations = context.relations();
 			var literal = context.literal();
+
+			var subject = context.xri();
+			if (inner > 0) subject = xdi.util.localSegment(subject, inner);
 	
 			for (var i in contexts) {
 
+				var index = subject.string() + '/';
+	
+				if (typeof object[index] === 'undefined') object[index] = new Array();
+				object[index].push(contexts[i].arc().string());
+
 				if (contexts[i].arc()._xref !== null && contexts[i].arc()._xref._partialsubject !== null) {
 				
-					var index = contexts[i].arc()._xref._partialsubject.string() + '/' + contexts[i].arc()._xref._partialpredicate.string();
+					var innerindex = contexts[i].arc()._xref._partialsubject.string() + '/' + contexts[i].arc()._xref._partialpredicate.string();
 
 					var innerobject = new Object();
 		
-					if (typeof object[index] === 'undefined') object[index] = new Array();
-					object[index].push(innerobject);
+					if (typeof object[innerindex] === 'undefined') object[innerindex] = new Array();
+					object[innerindex].push(innerobject);
 	
-					process(contexts[i], innerobject);
+					process(contexts[i], innerobject, inner+1);
 				} else {
-
-					var index = context.xri().string() + '/';
-		
-					if (typeof object[index] === 'undefined') object[index] = new Array();
-					object[index].push(contexts[i].arc().string());
 	
-					process(contexts[i], object);
+					process(contexts[i], object, inner);
 				}
 			}
 	
 			for (var i in relations) {
 	
-				var index = context.xri().string() + '/' + relations[i].arc().string();
+				var index = subject.string() + '/' + relations[i].arc().string();
 	
 				if (typeof object[index] === 'undefined') object[index] = new Array();
 				object[index].push(relations[i].target().string());
@@ -294,7 +297,7 @@
 	
 			if (literal !== null) {
 	
-				var index = context.xri().string() + '/' + '&';
+				var index = subject.string() + '/' + '&';
 	
 				if (typeof literal.data() !== 'undefined') object[index] = literal.data();
 			}
@@ -302,7 +305,7 @@
 
 		var object = new Object();
 
-		process(this._root, object);
+		process(this._root, object, 0);
 		
 		return JSON.stringify(object, null, pretty === true ? '\t' : null);
 	};
@@ -441,7 +444,7 @@
 
 				if (arc.xref() !== null && arc.xref().partialsubject() !== null && arc.xref().partialpredicate() !== null) {
 
-					this.context(arc.xref().partialsubject().string(), true).relation(arc.xref().partialpredicate().string(), newcontext.xri().string(), true);
+					context.context(arc.xref().partialsubject(), true).relation(arc.xref().partialpredicate(), newcontext.xri(), true);
 				}
 			}
 
@@ -1000,16 +1003,20 @@
 					return new Statement(null, subject, predicate, object);
 				},
 
-				parentSegment: function(segment) {
+				parentSegment: function(segment, i) {
 				
-					var subsegments = segment._subsegments.slice(0, -1);
+					if (typeof i === 'undefined') i = 1;
+
+					var subsegments = segment._subsegments.slice(0, -i);
 					
 					return new Segment(null, subsegments);
 				},
 
-				localSegment: function(segment) {
+				localSegment: function(segment, i) {
 				
-					var subsegments = segment._subsegments.slice(1);
+					if (typeof i === 'undefined') i = 1;
+				
+					var subsegments = segment._subsegments.slice(i);
 					
 					return new Segment(null, subsegments);
 				},
