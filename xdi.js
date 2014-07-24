@@ -722,9 +722,9 @@
 		
 		if (target instanceof Statement) {
 			
-			var innerRoot = xdi.parser.parseSegment("(" + this._operationsContext.xri().string() + "/" + operation.string() + ")");
+			var targetInnerRoot = xdi.parser.parseSegment("(" + this._operationsContext.xri().string() + "/" + operation.string() + ")");
 			
-			target = xdi.util.concatStatement(innerRoot, target);
+			target = xdi.util.concatStatement(targetInnerRoot, target);
 
 			this._operationsContext.graph().statement(target);
 		} else if (target instanceof Segment) {
