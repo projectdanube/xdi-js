@@ -1,4 +1,4 @@
-(function (window) {
+(function (global) {
 
 	//
 	// VERSION: 0.4-SNAPSHOT
@@ -1394,6 +1394,6 @@
 	 * Assign global 'xdi' object
 	 */
 
-	window.xdi = xdi;
+	global.xdi = xdi;
 
-})(window || this);
+})(typeof window === 'undefined' ? this : window);
