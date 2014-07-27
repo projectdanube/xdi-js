@@ -1,4 +1,4 @@
-(function (window) {
+(function (global) {
 
 	//
 	// VERSION: 0.4-SNAPSHOT
@@ -61,51 +61,6 @@
 	Statement.prototype.isLiteralStatement = function() {
 
 		return this.predicate().string() === xdi.constants.xri_literal;
-	};
-
-	Statement.prototype.innerRootNotationStatement = function() {
-
-		if (! this.isRelationStatement()) return null;
-
-		var innerrootnotationobjectsubsegments = this.object().subsegments();
-		if (innerrootnotationobjectsubsegments.length === 0) return null;
-
-		var innerrootnotationxref = innerrootnotationobjectsubsegments[0].xref();
-		if (innerrootnotationxref === null) return null;
-
-		var innerrootnotationstatement = innerrootnotationxref.statement();
-		if (innerrootnotationstatement === null) return null;
-
-		return innerrootnotationstatement;
-	};
-
-	Statement.prototype.isInnerRootNotation = function() {
-
-		return this.innerRootNotationStatement() !== null;
-	};
-
-	Statement.prototype.fromInnerRootNotation = function() {
-
-		var innerrootnotationstatement = this.innerRootNotationStatement();
-		if (innerrootnotationstatement === null) return this;
-
-		if (innerrootnotationstatement.isInnerRootNotation()) {
-
-			throw 'Not implemented';
-		} else {
-
-			var innerrootsubsegment = new Subsegment(null, null, false, false, null, new Xref(null, xdi.constants.xs_root, null, null, this.subject(), this.predicate(), null, null));
-			var innerrootsegment = new Segment(null, [ innerrootsubsegment ]);
-
-			var statement = xdi.util.concatStatement(innerrootsegment, innerrootnotationstatement, true);
-
-			return statement;
-		}
-	};
-
-	Statement.prototype.toInnerRootNotation = function() {
-
-		throw 'Not implemented';
 	};
 
 	function Segment(string, subsegments) {
@@ -186,14 +141,13 @@
 		return this._xref;
 	};
 
-	function Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal) {
+	function Xref(string, xs, segment, partialsubject, partialpredicate, iri, literal) {
 
-		if (! (this instanceof Xref)) return new Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal);
+		if (! (this instanceof Xref)) return new Xref(string, xs, segment, partialsubject, partialpredicate, iri, literal);
 
 		this._string = string;
 		this._xs = xs;
 		this._segment = segment;
-		this._statement = statement;
 		this._partialsubject = partialsubject;
 		this._partialpredicate = partialpredicate;
 		this._iri = iri;
@@ -204,7 +158,6 @@
 			this._string = '';
 			if (this._xs !== null) this._string += this._xs.charAt(0);
 			if (this._segment) this._string += this._segment.string();
-			if (this._statement) this._string += this._statement.string();
 			if (this._partialsubject !== null && this._partialpredicate !== null) this._string += this._partialsubject.string() + '/' + this._partialpredicate.string();
 			if (this._iri) this._string += this._iri;
 			if (this._literal) this._string += this._literal;
@@ -225,11 +178,6 @@
 	Xref.prototype.segment = function() {
 
 		return this._segment;
-	};
-
-	Xref.prototype.statement = function() {
-
-		return this._statement;
 	};
 
 	Xref.prototype.partialsubject = function() {
@@ -277,9 +225,7 @@
 
 		statement = statement instanceof Statement ? statement : xdi.parser.parseStatement(statement);
 
-		statement = statement.fromInnerRootNotation(statement);
-
-		var context = (statement.subject().string() === xdi.constants.xri_root) ? this._root : this._root.context(statement.subject().string(), true);
+		var context = (statement.subject().string() === xdi.constants.xri_root) ? this._root : this._root.context(statement.subject(), true);
 
 		if (statement.isContextNodeStatement()) context.context(statement.object().string(), true);
 		else if (statement.isLiteralStatement()) context.literal(statement.object());
@@ -309,25 +255,41 @@
 
 	Graph.prototype.serializeXDIJSON = function(pretty) {
 
-		var process = function(context, object) {
+		var process = function(context, object, inner) {
 
 			var contexts = context.contexts();
 			var relations = context.relations();
 			var literal = context.literal();
+
+			var subject = context.xri();
+			if (inner > 0) subject = xdi.util.localSegment(subject, inner);
 	
 			for (var i in contexts) {
 
-				var index = context.xri().string() + '/';
+				var index = subject.string() + '/';
 	
 				if (typeof object[index] === 'undefined') object[index] = new Array();
 				object[index].push(contexts[i].arc().string());
 
-				process(contexts[i], object);
+				if (contexts[i].arc()._xref !== null && contexts[i].arc()._xref._partialsubject !== null) {
+				
+					var innerindex = contexts[i].arc()._xref._partialsubject.string() + '/' + contexts[i].arc()._xref._partialpredicate.string();
+
+					var innerobject = new Object();
+		
+					if (typeof object[innerindex] === 'undefined') object[innerindex] = new Array();
+					object[innerindex].push(innerobject);
+	
+					process(contexts[i], innerobject, inner+1);
+				} else {
+	
+					process(contexts[i], object, inner);
+				}
 			}
 	
 			for (var i in relations) {
 	
-				var index = context.xri().string() + '/' + relations[i].arc().string();
+				var index = subject.string() + '/' + relations[i].arc().string();
 	
 				if (typeof object[index] === 'undefined') object[index] = new Array();
 				object[index].push(relations[i].target().string());
@@ -335,7 +297,7 @@
 	
 			if (literal !== null) {
 	
-				var index = context.xri().string() + '/' + '&';
+				var index = subject.string() + '/' + '&';
 	
 				if (typeof literal.data() !== 'undefined') object[index] = literal.data();
 			}
@@ -343,7 +305,7 @@
 
 		var object = new Object();
 
-		process(this._root, object);
+		process(this._root, object, 0);
 		
 		return JSON.stringify(object, null, pretty === true ? '\t' : null);
 	};
@@ -482,7 +444,7 @@
 
 				if (arc.xref() !== null && arc.xref().partialsubject() !== null && arc.xref().partialpredicate() !== null) {
 
-					this.context(arc.xref().partialsubject().string(), true).relation(arc.xref().partialpredicate().string(), newcontext.xri().string(), true);
+					context.context(arc.xref().partialsubject(), true).relation(arc.xref().partialpredicate(), newcontext.xri(), true);
 				}
 			}
 
@@ -763,10 +725,9 @@
 		
 		if (target instanceof Statement) {
 			
-			var innerRoot = xdi.parser.parseSegment("(" + this._operationsContext.xri().string() + "/" + operation.string() + ")");
+			var targetInnerRoot = xdi.parser.parseSegment("(" + this._operationsContext.xri().string() + "/" + operation.string() + ")");
 			
-			target = target.fromInnerRootNotation();
-			target = xdi.util.concatStatement(innerRoot, target, true);
+			target = xdi.util.concatStatement(targetInnerRoot, target);
 
 			this._operationsContext.graph().statement(target);
 		} else if (target instanceof Segment) {
@@ -787,7 +748,7 @@
 		var request = new XMLHttpRequest();
 		request.open('POST', endpoint, true);
 		request.setRequestHeader('Content-Type', 'text/xdi');
-		request.setRequestHeader('Accept', 'text/xdi;inner=0');
+		request.setRequestHeader('Accept', 'text/xdi');
 
 		request.onreadystatechange = function() {
 
@@ -1033,24 +994,31 @@
 					return xdi.parser.parseSegment(buffer);
 				},
 
-				concatStatement: function(segment, statement, concatTargetContextNodeXri) {
-
-					if (statement.isInnerRootNotation()) throw 'Cannot concat statement in inner root notation.';
+				concatStatement: function(segment, statement) {
 
 					var subject = xdi.util.concatSegments(segment, statement.subject());
 					var predicate = statement.predicate();
-
-					var object;
-
-					if (statement.isRelationStatement() && concatTargetContextNodeXri) {
-
-						object = xdi.util.concatSegments(segment, statement.object());
-					} else {
-
-						object = statement.object();
-					}
+					var object = statement.object();
 
 					return new Statement(null, subject, predicate, object);
+				},
+
+				parentSegment: function(segment, i) {
+				
+					if (typeof i === 'undefined') i = 1;
+
+					var subsegments = segment._subsegments.slice(0, -i);
+					
+					return new Segment(null, subsegments);
+				},
+
+				localSegment: function(segment, i) {
+				
+					if (typeof i === 'undefined') i = 1;
+				
+					var subsegments = segment._subsegments.slice(i);
+					
+					return new Segment(null, subsegments);
 				},
 
 				guid: function() {
@@ -1061,15 +1029,17 @@
 				},
 
 				getNodeType: function(nodelabel) {
+
 					if ((nodelabel === "") || (nodelabel.match(/^\(.*\)$/) != null))
 						return xdi.constants.nodetypes.ROOT;
-					if(nodelabel.match(/^".*"$/) != null)
+					else if (nodelabel.match(/^".*"$/) != null)
 						return xdi.constants.nodetypes.LITERAL;
-					if(nodelabel.slice(-1) === "&")
+					else if (nodelabel.slice(-1) === "&")
 						return xdi.constants.nodetypes.VALUE;
-					if(nodelabel.match(/^<.*>$/) != null)
+					else if (nodelabel.match(/^<.*>$/) != null)
 						return xdi.constants.nodetypes.ATTRIBUTE;
-					return xdi.constants.nodetypes.ENTITY;
+					else
+						return xdi.constants.nodetypes.ENTITY;
 				}
 			},
 
@@ -1263,14 +1233,13 @@
 					var xs = xdi.parser.xs(string.charAt(0));
 					if (xs === null) throw 'Invalid cross reference: ' + string + ' (no opening delimiter)';
 					if (string.charAt(string.length - 1) !== xs.charAt(1)) throw 'Invalid cross reference: ' + string + ' (invalid closing "' + xs.charAt(1) + '" delimiter)';
-					if (string.length === 2) return new Xref(string, xs, null, null, null, null, null, null);
+					if (string.length === 2) return new Xref(string, xs, null, null, null, null, null);
 
 					var value = string.substring(1, string.length - 1);
 
 					var temp = xdi.parser.stripXs(value);
 
 					var segment = null;
-					var statement = null;
 					var partialsubject = null;
 					var partialpredicate = null;
 					var iri = null;
@@ -1283,10 +1252,7 @@
 
 						var segments = temp.split('/').length;
 
-						if (segments === 3) {
-
-							statement = xdi.parser.parseStatement(value);
-						} else if (segments === 2) {
+						if (segments === 2) {
 
 							var parts = temp.split('/');
 							var split0 = parts[0].length;
@@ -1304,7 +1270,7 @@
 
 					// done
 
-					return new Xref(string, xs, segment, statement, partialsubject, partialpredicate, iri, literal);
+					return new Xref(string, xs, segment, partialsubject, partialpredicate, iri, literal);
 				},
 
 				cs: function(char) {
@@ -1435,6 +1401,6 @@
 	 * Assign global 'xdi' object
 	 */
 
-	window.xdi = xdi;
+	global.xdi = xdi;
 
-})(window || this);
+})(typeof window === 'undefined' ? this : window);
