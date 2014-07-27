@@ -360,7 +360,7 @@
 				
 				for (var ii in value) {
 				
-					if (typeof value[ii] !== 'string') throw 'Invalid value under ' + i;
+					if (typeof value[ii] !== 'string') throw 'Invalid value under ' + i + ': ' + value[ii];
 					
 					this.statement(i + '/' + value[ii]);
 				}
