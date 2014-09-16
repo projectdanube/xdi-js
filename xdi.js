@@ -288,23 +288,12 @@
 
 	Graph.prototype.serializeXDIDISPLAY = function() {
 
-		var statements = this.statements();
-		var buffer = '';
-
-		for (var i in statements) buffer += statements[i].string() + '\n';
-
-		return buffer;
+		return xdi.io.write(this);
 	};
 
 	Graph.prototype.deserializeXDIDISPLAY = function(string) {
 
-		var statements = string.split('\n');
-
-		for (var i in statements) {
-
-			if (statements[i].replace(/\s/g, '') === '') continue;
-			this.statement(statements[i]);
-		}
+		xdi.io.read(this, string);
 	};
 
 	Graph.prototype.serializeXDIJSON = function(pretty) {
@@ -1075,9 +1064,10 @@
 
 			io: {
 
-				read: function(string) {
+				read: function(string, graph) {
 
-					var graph = xdi.graph();
+					if (typeof graph === 'undefined') graph = xdi.graph();
+
 					var lines = string.split('\n');
 
 					for (var i in lines) {
