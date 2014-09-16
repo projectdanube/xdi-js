@@ -48,10 +48,10 @@ function graph() {
 	
 	$("#graphresult1").html("");
 	$("#graphresult1").append("<p class='segment'>STATEMENTS: " + g.statements().length + "</p>");
-	$("#graphresult1").append(g.serializeXDIDISPLAY());
+	$("#graphresult1").append(document.createTextNode(g.serializeXDIDISPLAY()));
 	
 	$("#graphresult2").html("");
-	$("#graphresult2").append(g.serializeXDIJSON(true));
+	$("#graphresult2").append(document.createTextNode(g.serializeXDIJSON(true)));
 }
 
 function graphclear() {
@@ -68,7 +68,7 @@ function convert1() {
 	
 	$("#convertresult").html("");
 	$("#convertresult").append("<p class='segment'>STATEMENTS: " + g.statements().length + "</p>");
-	$("#convertresult").append(g.serializeXDIJSON(true));
+	$("#convertresult").append(document.createTextNode(g.serializeXDIJSON(true)));
 }
 
 function convert2() {
@@ -79,7 +79,7 @@ function convert2() {
 	
 	$("#convertresult").html("");
 	$("#convertresult").append("<p class='segment'>STATEMENTS: " + g.statements().length + "</p>");
-	$("#convertresult").append(g.serializeXDIDISPLAY());
+	$("#convertresult").append(document.createTextNode(g.serializeXDIDISPLAY()));
 }
 
 function convertclear() {
