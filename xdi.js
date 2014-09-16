@@ -239,7 +239,7 @@
 
 	Graph.prototype.deserializeXDIDISPLAY = function(string) {
 
-		xdi.io.read(this, string);
+		xdi.io.read(string, this);
 	};
 
 	Graph.prototype.serializeXDIJSON = function(pretty) {
