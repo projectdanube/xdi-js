@@ -1,0 +1,22 @@
+{
+  "name": "xdi",
+  "version": "0.4-SNAPSHOT",
+  "homepage": "http://xdi-js.projectdanube.org/",
+  "description": "xdi.js is an XDI client library for JavaScript, intended to be used by browser-based applications to communicate with XDI servers.",
+  "main": "xdi.js",
+  "license": "MIT",
+  "author": "peacekeeper <markus@projectdanube.org>",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/projectdanube/xdi-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/projectdanube/xdi-js/issues"
+  },
+  "dependencies": {
+    "xmlhttprequest": "^1.6.0"
+  }
+}
