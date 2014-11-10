@@ -1,0 +1,28 @@
+{
+  "name": "xdi",
+  "version": "0.4-SNAPSHOT",
+  "homepage": "http://xdi-js.projectdanube.org/",
+  "description": "xdi.js is an XDI client library for JavaScript, intended to be used by browser-based applications to communicate with XDI servers.",
+  "main": "xdi.js",
+  "license": "MIT",
+  "authors": [
+    "peacekeeper <markus@projectdanube.org>"
+  ],
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "keywords": [
+    "xdi",
+    "graph",
+    "cloud"
+  ],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
