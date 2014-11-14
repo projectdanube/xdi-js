@@ -1,10 +1,10 @@
-(function (global) {
+(function (global, module, XHR) {
 
 	//
 	// VERSION: 0.4-SNAPSHOT
 	//
 
-	'use strict';
+  'use strict';
 
 	/*
 	 * Statement, Segment, Subsegment, Xref classes
@@ -734,7 +734,7 @@
 
 		if (typeof endpoint === 'undefined') throw 'No endpoint given.';
 
-		var request = new XMLHttpRequest();
+		var request = new XHR();
 		request.open('POST', endpoint, true);
 		request.setRequestHeader('Content-Type', 'text/xdi');
 		request.setRequestHeader('Accept', 'text/xdi');
@@ -1388,9 +1388,26 @@
 	xdi.Discovery = Discovery;
 
 	/*
-	 * Assign global 'xdi' object
+	 * module definitions
 	 */
 
-	global.xdi = xdi;
+  // Node.js
+  if (module && typeof module !== 'undefined' && module.exports) {
+      module.exports = xdi;
+  }
+  // AMD / RequireJS
+  else if (typeof define !== 'undefined' && define.amd) {
+      define([], function () {
+          return xdi;
+      });
+  }
+  // included directly via <script> tag
+  else {
+      global.xdi = xdi;
+  }
 
-})(typeof window === 'undefined' ? this : window);
+})(
+  typeof window === "undefined" ? global : window,
+  typeof module === "undefined" ? undefined : module,
+  typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest
+);
