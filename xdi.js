@@ -4,7 +4,7 @@
 	// VERSION: 0.4-SNAPSHOT
 	//
 
-  'use strict';
+	'use strict';
 
 	/*
 	 * Statement, Segment, Subsegment, Xref classes
@@ -1391,23 +1391,22 @@
 	 * module definitions
 	 */
 
-  // Node.js
-  if (module && typeof module !== 'undefined' && module.exports) {
-      module.exports = xdi;
-  }
-  // AMD / RequireJS
-  else if (typeof define !== 'undefined' && define.amd) {
-      define([], function () {
-          return xdi;
-      });
-  }
-  // included directly via <script> tag
-  else {
-      global.xdi = xdi;
-  }
-
+	// Node.js
+	if (module && typeof module !== 'undefined' && module.exports) {
+		module.exports = xdi;
+	}
+	// AMD / RequireJS
+	else if (typeof define !== 'undefined' && define.amd) {
+		define([], function () {
+			return xdi;
+		});
+	}
+	// included directly via <script> tag
+	else {
+		global.xdi = xdi;
+	}
 })(
-  typeof window === "undefined" ? global : window,
-  typeof module === "undefined" ? undefined : module,
-  typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest
+	typeof window === "undefined" ? global : window,
+	typeof module === "undefined" ? undefined : module,
+	typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest
 );
