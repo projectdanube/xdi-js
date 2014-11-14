@@ -1,17 +1,10 @@
-(function (global, module, define, XHR) {
+(function (global, module, XHR) {
 
 	//
 	// VERSION: 0.4-SNAPSHOT
 	//
 
   'use strict';
-
-  var global = window || this;
-  var XHR = XMLHttpRequest;
-
-  if(!XHR && module && module.exports) {
-    XHR = require("xmlhttprequest").XMLHttpRequest;
-  }
 
 	/*
 	 * Statement, Segment, Subsegment, Xref classes
@@ -1413,4 +1406,8 @@
       global.xdi = xdi;
   }
 
-})();
+})(
+  typeof window === "undefined" ? global : window,
+  typeof module === "undefined" ? undefined : module,
+  typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest
+);
