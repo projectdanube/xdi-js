@@ -771,7 +771,7 @@
 					}
 				} else {
 
-					var errorText = 'Received error while sending: ' + request.statusText;
+					var errorText = 'Received error while sending: ' + request.status + ": " + request.statusText;
 
 					if (typeof error === 'function') error(errorText);
 					return;
