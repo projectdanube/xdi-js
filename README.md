@@ -4,7 +4,7 @@
 [xdi.js](http://github.com/projectdanube/xdi-js) is an XDI client library for JavaScript, intended to be used by browser-based applications
 to communicate with XDI servers.
 
-xdi.js can be imported as a NodeJS module, AMD / RequireJS module, or included directly into a web page via <script> tag.
+xdi.js can be imported as a NodeJS module, AMD / RequireJS module, or included directly into a web page via &lt;script&gt; tag.
 
 A sample deployment of xdi.js is available at http://xdi-js.projectdanube.org.
 
