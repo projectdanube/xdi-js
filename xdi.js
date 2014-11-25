@@ -1,4 +1,4 @@
-(function (global, module, XHR) {
+(function (global, module, define, XHR) {
 
 	//
 	// VERSION: 0.4-SNAPSHOT
@@ -1396,17 +1396,22 @@
 		module.exports = xdi;
 	}
 	// AMD / RequireJS
-	else if (typeof define !== 'undefined' && define.amd) {
+	else if (define && typeof define !== 'undefined' && define.amd) {
 		define([], function () {
 			return xdi;
 		});
 	}
 	// included directly via <script> tag
-	else {
+	else if (global && typeof global !== 'undefined') {
 		global.xdi = xdi;
+	}
+	// perhaps included via eval()
+	else {
+		return xdi;
 	}
 })(
 	typeof window === "undefined" ? global : window,
 	typeof module === "undefined" ? undefined : module,
+	typeof define === "undefined" ? undefined : define,
 	typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest
 );
