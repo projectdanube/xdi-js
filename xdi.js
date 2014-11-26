@@ -1,10 +1,37 @@
-(function (global, module, define, XHR) {
+(function (global, module, define, XHR, xdipost) {
 
 	//
 	// VERSION: 0.4-SNAPSHOT
 	//
 
 	'use strict';
+
+	/* 
+	 * xdipost
+	 */
+
+	if (xdipost && typeof xdipost !== 'undefined') {
+		
+	} else {
+		
+		xdipost = function(endpoint, requestbody, success, error) {
+
+			var request = new XHR();
+			request.open('POST', endpoint, true);
+			request.setRequestHeader('Content-Type', 'text/xdi');
+			request.setRequestHeader('Accept', 'text/xdi');
+			request.onreadystatechange = function() {
+				if (request.readyState === 4) {
+					if (request.status === 200) {
+						success(request.responseText);
+					} else {
+						error(request.stats + " / " + request.statusText);
+					}
+				}
+			};
+			request.send(requestbody);
+		};
+	}
 
 	/*
 	 * Statement, Segment, Subsegment, Xref classes
@@ -734,52 +761,36 @@
 
 		if (typeof endpoint === 'undefined') throw 'No endpoint given.';
 
-		var request = new XHR();
-		request.open('POST', endpoint, true);
-		request.setRequestHeader('Content-Type', 'text/xdi');
-		request.setRequestHeader('Accept', 'text/xdi');
+		xdipost(
+			endpoint, 
+			xdi.io.write(this.messageEnvelope().graph()),
+	        function(responsebody) {
 
-		request.onreadystatechange = function() {
+				var responsegraph;
 
-			if (request.readyState === 4) {
-
-				if (request.status === 200) {
-
-					var response;
-
-					try {
-
-						response = xdi.io.read(request.responseText);
-					} catch (ex) {
-
-						var errorText = 'Received invalid response from server: ' + ex;
-
-						if (typeof error === 'function') error(errorText);
-						return;
-					}
-
-					if (response.root().context(xdi.constants.xri_error) !== null) {
-
-						var errorText = 'Received error from server: ' + response.root().context(xdi.constants.xri_error).context(xdi.constants.xri_value).literal().data();
-
-						if (typeof error === 'function') error(errorText);
-						return;
-					} else {
-
-						if (typeof success === 'function') success(response);
-						return;
-					}
-				} else {
-
-					var errorText = 'Received error while sending: ' + request.status + ": " + request.statusText;
-
+				try {
+					responsegraph = xdi.io.read(responsebody);
+				} catch (ex) {
+					var errorText = 'Received invalid response from server: ' + ex;
 					if (typeof error === 'function') error(errorText);
 					return;
 				}
-			}
-		};
 
-		request.send(xdi.io.write(this.messageEnvelope().graph()));
+				if (responsegraph.root().context(xdi.constants.xri_error) !== null) {
+					var errorText = 'Received error from server: ' + responsegraph.root().context(xdi.constants.xri_error).context(xdi.constants.xri_value).literal().data();
+					if (typeof error === 'function') error(errorText);
+					return;
+				} else {
+					if (typeof success === 'function') success(responsegraph);
+					return;
+				}
+	        },
+	        function(responseerror) {
+
+				var errorText = 'Received error while sending: ' + responseerror;
+				if (typeof error === 'function') error(errorText);
+				return;
+	        });
 	};
 
 	/*
@@ -1413,5 +1424,6 @@
 	typeof window === "undefined" ? global : window,
 	typeof module === "undefined" ? undefined : module,
 	typeof define === "undefined" ? undefined : define,
-	typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest
+	typeof XMLHttpRequest === "undefined" && module ? require("xmlhttprequest").XMLHttpRequest : XMLHttpRequest,
+	typeof xdipost === "undefined" ? undefined : xdipost
 );
