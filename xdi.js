@@ -551,6 +551,46 @@
 
 		return this._literal;
 	};
+	
+	Context.prototype.entities = function() {
+		
+		var entities = [];
+		
+		for (var i in this._contexts) {
+			
+			if (xdi.util.arcType(this._contexts[i]) === xdi.constants.arctypes.ENTITY) {
+				
+				var deepentities = this._contexts[i].attributes();
+				
+				if (deepentities.length > 0)
+					entities = entities.concat(deepentities);
+				else
+					entities.push(this._contexts[i]);
+			}
+		}
+		
+		return entities;
+	};
+	
+	Context.prototype.attributes = function() {
+		
+		var attributes = [];
+		
+		for (var i in this._contexts) {
+			
+			if (xdi.util.arcType(this._contexts[i]) === xdi.constants.arctypes.ATTRIBUTE) {
+				
+				var deepattributes = this._contexts[i].attributes();
+				
+				if (deepattributes.length > 0)
+					attributes = attributes.concat(deepattributes);
+				else
+					attributes.push(this._contexts[i]);
+			}
+		}
+		
+		return attributes;
+	};
 
 	function Relation(graph, parent, arc, target) {
 
