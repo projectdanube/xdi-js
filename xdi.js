@@ -749,6 +749,36 @@
 		return this;
 	};
 
+	Message.prototype.messageParameter = function(parameter, value) {
+
+		if (typeof value === 'undefined') {
+
+			var context = this._context.context(parameter + xdi.constants.xri_value);
+			var literal = context === null ? null : context.literal();
+
+			return literal === null ? null : literal.data();
+		}
+
+		this._context.context(parameter + xdi.constants.xri_value, true).literal(value);
+
+		return this;
+	};
+
+	Message.prototype.operationParameter = function(operation, parameter, value) {
+
+		if (typeof value === 'undefined') {
+
+			var context = this._context.context(operation + parameter + xdi.constants.xri_value);
+			var literal = context === null ? null : context.literal();
+
+			return literal === null ? null : literal.data();
+		}
+
+		this._context.context(operation + parameter + xdi.constants.xri_value, true).literal(value);
+
+		return this;
+	};
+
 	Message.prototype.secretToken = function(secretToken) {
 
 		if (typeof secretToken === 'undefined') {
