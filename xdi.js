@@ -113,6 +113,11 @@
 
 		return this._subsegments;
 	};
+	
+	Segment.prototype.length = function() {
+	
+		return this._subsegments.length;
+	};
 
 	function Subsegment(string, cs, classxs, attributexs, literal, xref) {
 
@@ -1106,11 +1111,11 @@
 						arcString = object.string();
 					else arcString = object;
 					
-					if ((arcString === "") || (arcString.match(/^\(.*\)$/) != null))
+					if ((arcString === "") || (arcString.match(/^\(.*\)$/) !== null))
 						return xdi.constants.arctypes.ROOT;
 					else if (arcString.slice(-1) === "&")
 						return xdi.constants.arctypes.VALUE;
-					else if (arcString.match(/^<.*>$/) != null)
+					else if (arcString.match(/^<.*>$/) !== null)
 						return xdi.constants.arctypes.ATTRIBUTE;
 					else
 						return xdi.constants.arctypes.ENTITY;
