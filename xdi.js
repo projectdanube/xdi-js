@@ -289,16 +289,16 @@
 
 				var index = subject.string() + '/';
 	
-				if (typeof object[index] === 'undefined') object[index] = new Array();
+				if (typeof object[index] === 'undefined') object[index] = [];
 				object[index].push(contexts[i].arc().string());
 
 				if (contexts[i].arc()._xref !== null && contexts[i].arc()._xref._partialsubject !== null) {
 				
 					var innerindex = contexts[i].arc()._xref._partialsubject.string() + '/' + contexts[i].arc()._xref._partialpredicate.string();
 
-					var innerobject = new Object();
+					var innerobject = {};
 		
-					if (typeof object[innerindex] === 'undefined') object[innerindex] = new Array();
+					if (typeof object[innerindex] === 'undefined') object[innerindex] = [];
 					object[innerindex].push(innerobject);
 	
 					process(contexts[i], innerobject, inner+1);
@@ -312,7 +312,7 @@
 	
 				var index = subject.string() + '/' + relations[i].arc().string();
 	
-				if (typeof object[index] === 'undefined') object[index] = new Array();
+				if (typeof object[index] === 'undefined') object[index] = [];
 				object[index].push(relations[i].target().string());
 			}
 	
@@ -324,7 +324,7 @@
 			}
 		};
 
-		var object = new Object();
+		var object = {};
 
 		process(this._root, object, 0);
 		
@@ -1187,8 +1187,8 @@
 
 					var start = 0, pos = 0;
 					var pair = null;
-					var pairs = new Array();
-					var subsegments = new Array();
+					var pairs = [];
+					var subsegments = [];
 
 					while (pos < string.length) {
 
