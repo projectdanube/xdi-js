@@ -867,13 +867,11 @@
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
 				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/',
-				nodetypes: {
-					LITERAL: "literal",
-					CONTEXT: "context",
-					ROOT:"root",
-					ENTITY:"entity",
-					ATTRIBUTE:"attribute",
-					VALUE:"value"
+				arctypes: {
+					ROOT: 'root',
+					ENTITY: 'entity',
+					ATTRIBUTE: 'attribute',
+					VALUE: 'value'
 				}
 			},
 
@@ -1028,18 +1026,24 @@
 					return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
 				},
 
-				getNodeType: function(nodelabel) {
+				arcType: function(object) {
 
-					if ((nodelabel === "") || (nodelabel.match(/^\(.*\)$/) != null))
-						return xdi.constants.nodetypes.ROOT;
-					else if (nodelabel.match(/^".*"$/) != null)
-						return xdi.constants.nodetypes.LITERAL;
-					else if (nodelabel.slice(-1) === "&")
-						return xdi.constants.nodetypes.VALUE;
-					else if (nodelabel.match(/^<.*>$/) != null)
-						return xdi.constants.nodetypes.ATTRIBUTE;
+					var arcString;
+
+					if (object instanceof Context)
+						arcString = object.arc().string();
+					else if (object instanceof Subsegment)
+						arcString = object.string();
+					else arcString = object;
+					
+					if ((arcString === "") || (arcString.match(/^\(.*\)$/) != null))
+						return xdi.constants.arctypes.ROOT;
+					else if (arcString.slice(-1) === "&")
+						return xdi.constants.arctypes.VALUE;
+					else if (arcString.match(/^<.*>$/) != null)
+						return xdi.constants.arctypes.ATTRIBUTE;
 					else
-						return xdi.constants.nodetypes.ENTITY;
+						return xdi.constants.arctypes.ENTITY;
 				}
 			},
 
