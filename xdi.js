@@ -119,14 +119,16 @@
 		return this._subsegments.length;
 	};
 
-	function Subsegment(string, cs, classxs, attributexs, literal, xref) {
+	function Subsegment(string, cs, variable, definition, collection, attribute, literal, xref) {
 
-		if (! (this instanceof Subsegment)) return new Subsegment(string, cs, classxs, attributexs, literal, xref);
+		if (! (this instanceof Subsegment)) return new Subsegment(string, cs, variable, definition, collection, attribute, literal, xref);
 
 		this._string = string;
 		this._cs = cs;
-		this._classxs = classxs;
-		this._attributexs = attributexs;
+		this._variable = variable;
+		this._definition = definition;
+		this._collection = collection;
+		this._attribute = attribute;
 		this._literal = literal;
 		this._xref = xref;
 
@@ -134,12 +136,16 @@
 
 			this._string = '';
 			if (this._cs !== null) this._string += this._cs;
-			if (this._classxs) this._string += xdi.constants.xs_class.charAt(0);
-			if (this._attributexs) this._string += xdi.constants.xs_attribute.charAt(0);
+			if (this._variable) this._string += xdi.constants.xs_variable.charAt(0);
+			if (this._definition) this._string += xdi.constants.xs_definition.charAt(0);
+			if (this._collection) this._string += xdi.constants.xs_collection.charAt(0);
+			if (this._attribute) this._string += xdi.constants.xs_attribute.charAt(0);
 			if (this._literal !== null) this._string += this._literal;
 			if (this._xref !== null) this._string += this._xref._string;
-			if (this._attributexs) this._string += xdi.constants.xs_attribute.charAt(1);
-			if (this._classxs) this._string += xdi.constants.xs_class.charAt(1);
+			if (this._attribute) this._string += xdi.constants.xs_attribute.charAt(1);
+			if (this._collection) this._string += xdi.constants.xs_collection.charAt(1);
+			if (this._definition) this._string += xdi.constants.xs_definition.charAt(1);
+			if (this._variable) this._string += xdi.constants.xs_variable.charAt(1);
 		}
 	}
 
@@ -153,14 +159,24 @@
 		return this._cs;
 	};
 
-	Subsegment.prototype.classxs = function() {
+	Subsegment.prototype.variable = function() {
 
-		return this._classxs;
+		return this._variable;
 	};
 
-	Subsegment.prototype.attributexs = function() {
+	Subsegment.prototype.definition = function() {
 
-		return this._attributexs;
+		return this._definition;
+	};
+
+	Subsegment.prototype.collection = function() {
+
+		return this._collection;
+	};
+
+	Subsegment.prototype.attribute = function() {
+
+		return this._attribute;
 	};
 
 	Subsegment.prototype.literal = function() {
@@ -923,7 +939,8 @@
 				cs_array: [ '=', '+', '*', '#', '$', '&', '!', '@' ],
 				xs_root: '()',
 				xs_variable: '{}',
-				xs_class: '[]',
+				xs_definition: '||',
+				xs_collection: '[]',
 				xs_attribute: '<>',
 				xri_root: '',
 				xri_context: '',
@@ -1194,10 +1211,12 @@
 
 						// parse beginning of subsegment
 
-						if (pos < string.length && (pair = xdi.parser.cla(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
-						if (pos < string.length && (pair = xdi.parser.att(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
+						if (pos < string.length && (pair = xdi.parser.xsvariable(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
+						if (pos < string.length && (pair = xdi.parser.xsdefinition(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
+						if (pos < string.length && (pair = xdi.parser.xscollection(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
+						if (pos < string.length && (pair = xdi.parser.xsattribute(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
 						if (pos < string.length && xdi.parser.cs(string.charAt(pos)) !== null) pos++;
-						if (pos < string.length && (pair = xdi.parser.xs(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
+						if (pos < string.length && (pair = xdi.parser.xsxref(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
 
 						// parse to the end of the subsegment
 
@@ -1209,34 +1228,38 @@
 
 								// reached beginning of the next subsegment
 
-								if (xdi.parser.cla(string.charAt(pos)) !== null) break;
-								if (xdi.parser.att(string.charAt(pos)) !== null) break;
+								if (xdi.parser.xsvariable(string.charAt(pos)) !== null) break;
+								if (xdi.parser.xsdefinition(string.charAt(pos)) !== null) break;
+								if (xdi.parser.xscollection(string.charAt(pos)) !== null) break;
+								if (xdi.parser.xsattribute(string.charAt(pos)) !== null) break;
 								if (xdi.parser.cs(string.charAt(pos)) !== null) break;
-								if (xdi.parser.xs(string.charAt(pos)) !== null) break;
+								if (xdi.parser.xsxref(string.charAt(pos)) !== null) break;
 							}
 
 							// at least one pair still open?
 
 							if (pairs.length > 0) {
 
-								// new pair being opened?
-
-								pair = xdi.parser.cla(string.charAt(pos));
-								if (pair === null) pair = xdi.parser.att(string.charAt(pos));
-								if (pair === null) pair = xdi.parser.xs(string.charAt(pos));
-
-								if (pair !== null) {
-
-									pairs.push(pair);
-									pos++;
-									continue;
-								}
-
 								// pair being closed?
 
 								if (string.charAt(pos) === pairs[pairs.length - 1].charAt(1)) {
 
 									pairs.pop();
+									pos++;
+									continue;
+								}
+
+								// new pair being opened?
+
+								pair = xdi.parser.xsvariable(string.charAt(pos));
+								if (pair === null) pair = xdi.parser.xsdefinition(string.charAt(pos));
+								if (pair === null) pair = xdi.parser.xscollection(string.charAt(pos));
+								if (pair === null) pair = xdi.parser.xsattribute(string.charAt(pos));
+								if (pair === null) pair = xdi.parser.xsxref(string.charAt(pos));
+
+								if (pair !== null) {
+
+									pairs.push(pair);
 									pos++;
 									continue;
 								}
@@ -1259,25 +1282,45 @@
 
 					var pos = 0, len = string.length;
 					var cs = null;
-					var cla = null;
-					var att = null;
+					var variable = null;
+					var definition = null;
+					var collection = null;
+					var attribute = null;
 					var literal = null;
 					var xref = null;
 
-					// extract class pair
+					// extract variable pair
 
-					if (pos < len && (cla = xdi.parser.cla(string.charAt(pos))) !== null) {
+					if (pos < len && (variable = xdi.parser.xsvariable(string.charAt(pos))) !== null) {
 
-						if (string.charAt(len - 1) !== cla.charAt(1)) throw 'Invalid subsegment: ' + string + ' (invalid closing "' + cla.charAt(1) + '" character for class at position ' + pos + ')';
+						if (string.charAt(len - 1) !== variable.charAt(1)) throw 'Invalid subsegment: ' + string + ' (invalid closing "' + variable.charAt(1) + '" character for variable at position ' + pos + ')';
+
+						pos++; len--;
+					}
+
+					// extract definition pair
+
+					if (pos < len && (definition = xdi.parser.xsdefinition(string.charAt(pos))) !== null) {
+
+						if (string.charAt(len - 1) !== definition.charAt(1)) throw 'Invalid subsegment: ' + string + ' (invalid closing "' + definition.charAt(1) + '" character for definition at position ' + pos + ')';
+
+						pos++; len--;
+					}
+
+					// extract collection pair
+
+					if (pos < len && (collection = xdi.parser.xscollection(string.charAt(pos))) !== null) {
+
+						if (string.charAt(len - 1) !== collection.charAt(1)) throw 'Invalid subsegment: ' + string + ' (invalid closing "' + collection.charAt(1) + '" character for collection at position ' + pos + ')';
 
 						pos++; len--;
 					}
 
 					// extract attribute pair
 
-					if (pos < len && (att = xdi.parser.att(string.charAt(pos))) !== null) {
+					if (pos < len && (attribute = xdi.parser.xsattribute(string.charAt(pos))) !== null) {
 
-						if (string.charAt(len - 1) !== att.charAt(1)) throw 'Invalid subsegment: ' + string + ' (invalid closing "' + att.charAt(1) + '" character for attribute at position ' + pos + ')';
+						if (string.charAt(len - 1) !== attribute.charAt(1)) throw 'Invalid subsegment: ' + string + ' (invalid closing "' + attribute.charAt(1) + '" character for attribute at position ' + pos + ')';
 
 						pos++; len--;
 					}
@@ -1293,7 +1336,7 @@
 
 					if (pos < len) {
 
-						if (xdi.parser.xs(string.charAt(pos)) !== null) {
+						if (xdi.parser.xsxref(string.charAt(pos)) !== null) {
 
 							xref = xdi.parser.parseXref(string.substring(pos, len));
 						} else {
@@ -1305,12 +1348,12 @@
 
 					// done
 
-					return new Subsegment(string, cs, cla !== null, att !== null, literal, xref);
+					return new Subsegment(string, cs, variable !== null, definition !== null, collection !== null, attribute !== null, literal, xref);
 				},
 
 				parseXref: function(string) {
 
-					var xs = xdi.parser.xs(string.charAt(0));
+					var xs = xdi.parser.xsxref(string.charAt(0));
 					if (xs === null) throw 'Invalid cross reference: ' + string + ' (no opening delimiter)';
 					if (string.charAt(string.length - 1) !== xs.charAt(1)) throw 'Invalid cross reference: ' + string + ' (invalid closing "' + xs.charAt(1) + '" delimiter)';
 					if (string.length === 2) return new Xref(string, xs, null, null, null, null, null);
@@ -1334,12 +1377,13 @@
 
 						if (segments === 2) {
 
+							temp = " " + temp + " ";
 							var parts = temp.split('/');
-							var split0 = parts[0].length;
+							var split0 = parts[0].length - 1;
 
 							partialsubject = xdi.parser.parseSegment(value.substring(0, split0));
 							partialpredicate = xdi.parser.parseSegment(value.substring(split0 + 1));
-						} else if (xdi.parser.cs(value.charAt(0)) !== null || xdi.parser.cla(value.charAt(0)) || xdi.parser.att(value.charAt(0)) || xdi.parser.xs(value.charAt(0))) {
+						} else if (value.length === 0 || xdi.parser.cs(value.charAt(0)) !== null || xdi.parser.xsvariable(value.charAt(0)) || xdi.parser.xsdefinition(value.charAt(0)) || xdi.parser.xscollection(value.charAt(0)) || xdi.parser.xsattribute(value.charAt(0)) || xdi.parser.xsxref(value.charAt(0))) {
 
 							segment = xdi.parser.parseSegment(value);
 						} else {
@@ -1360,32 +1404,45 @@
 					return null;
 				},
 
-				cla: function(char) {
+				xsvariable: function(char) {
 
-					if (xdi.constants.xs_class.charAt(0) === char) return xdi.constants.xs_class;
+					if (xdi.constants.xs_variable.charAt(0) === char) return xdi.constants.xs_variable;
 
 					return null;
 				},
 
-				att: function(char) {
+				xsdefinition: function(char) {
+
+					if (xdi.constants.xs_definition.charAt(0) === char) return xdi.constants.xs_definition;
+
+					return null;
+				},
+
+				xscollection: function(char) {
+
+					if (xdi.constants.xs_collection.charAt(0) === char) return xdi.constants.xs_collection;
+
+					return null;
+				},
+
+				xsattribute: function(char) {
 
 					if (xdi.constants.xs_attribute.charAt(0) === char) return xdi.constants.xs_attribute;
 
 					return null;
 				},
 
-				xs: function(char) {
+				xsxref: function(char) {
 
 					if (xdi.constants.xs_root.charAt(0) === char) return xdi.constants.xs_root;
-					if (xdi.constants.xs_variable.charAt(0) === char) return xdi.constants.xs_variable;
 
 					return null;
 				},
 
 				stripXs: function(string) {
 
+					string = xdi.parser.stripPattern(string, /\|[^\|]*\|/);
 					string = xdi.parser.stripPattern(string, /\([^\(\)]*\)/);
-					string = xdi.parser.stripPattern(string, /\{[^\{\}]*\}/);
 					string = xdi.parser.stripPattern(string, /\"[^\"]*\"/);
 
 					return string;
