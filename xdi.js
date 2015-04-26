@@ -1,7 +1,7 @@
 (function (global, module, define, XHR, xdipost) {
 
 	//
-	// VERSION: 0.4
+	// VERSION: 0.5-SNAPSHOT
 	//
 
 	'use strict';
