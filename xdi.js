@@ -1028,6 +1028,14 @@
 
 							xdiEndpointContext = xdiEndpointContext.dereference();
 
+							if (xdiEndpointContext.literal() === null) {
+
+								var errorText = 'Could not find XDI endpoint literal in discovery result.';
+
+								if (typeof error === 'function') error(errorText);
+								return;
+							}
+
 							var xdiEndpoint = xdiEndpointContext.literal().data();
 
 							if (serviceTypes.length === 0) {
