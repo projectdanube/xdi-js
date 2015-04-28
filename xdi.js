@@ -774,13 +774,13 @@
 
 		if (typeof value === 'undefined') {
 
-			var context = this._context.context(parameter + xdi.constants.xri_value);
+			var context = this._context.context(parameter);
 			var literal = context === null ? null : context.literal();
 
 			return literal === null ? null : literal.data();
 		}
 
-		this._context.context(parameter + xdi.constants.xri_value, true).literal(value);
+		this._context.context(parameter, true).literal(value);
 
 		return this;
 	};
@@ -789,13 +789,13 @@
 
 		if (typeof value === 'undefined') {
 
-			var context = this._context.context(operation + parameter + xdi.constants.xri_value);
+			var context = this._context.context(operation + parameter);
 			var literal = context === null ? null : context.literal();
 
 			return literal === null ? null : literal.data();
 		}
 
-		this._context.context(operation + parameter + xdi.constants.xri_value, true).literal(value);
+		this._context.context(operation + parameter, true).literal(value);
 
 		return this;
 	};
@@ -868,7 +868,7 @@
 				}
 
 				if (responsegraph.root().context(xdi.constants.xri_error) !== null) {
-					var errorText = 'Received error from server: ' + responsegraph.root().context(xdi.constants.xri_error).context(xdi.constants.xri_value).literal().data();
+					var errorText = 'Received error from server: ' + responsegraph.root().context(xdi.constants.xri_error).literal().data();
 					if (typeof error === 'function') error(errorText);
 					return;
 				} else {
@@ -933,7 +933,7 @@
 				cs_authority_general: '*',
 				cs_class_unreserved: '#',
 				cs_class_reserved: '$',
-				cs_value: '&',
+				cs_literal: '&',
 				cs_member_unordered: '!',
 				cs_member_ordered: '@',
 				cs_array: [ '=', '+', '*', '#', '$', '&', '!', '@' ],
@@ -944,7 +944,6 @@
 				xs_attribute: '<>',
 				xri_root: '',
 				xri_context: '',
-				xri_value: '&',
 				xri_literal: '&',
 				xri_variable: '{}',
 				xri_anon: '$anon',
@@ -953,7 +952,7 @@
 				xri_is_context: '$is()',
 				xri_ref: '$ref',
 				xri_rep: '$rep',
-				xri_secret_token: '<$secret><$token>&',
+				xri_secret_token: '<$secret><$token>',
 				xri_do: '$do',
 				xri_uri: '<$uri>',
 				xri_xdi_uri: '<$xdi><$uri>',
@@ -1029,7 +1028,7 @@
 
 							xdiEndpointContext = xdiEndpointContext.dereference();
 
-							var xdiEndpoint = xdiEndpointContext.context(xdi.constants.xri_value).literal().data();
+							var xdiEndpoint = xdiEndpointContext.literal().data();
 
 							if (serviceTypes.length === 0) {
 
@@ -1058,7 +1057,7 @@
 											if (serviceEndpointContext === null) continue;
 				
 											serviceEndpointContext = serviceEndpointContext.dereference();
-											var serviceEndpoint = serviceEndpointContext.context(xdi.constants.xri_value).literal().data();
+											var serviceEndpoint = serviceEndpointContext.literal().data();
 
 											services[serviceTypes[i]] = serviceEndpoint;
 										}
@@ -1182,7 +1181,7 @@
 					var subject = xdi.parser.parseSegment(string.substring(0, split0));
 					var predicate = xdi.parser.parseSegment(string.substring(split0 + 1, split0 + split1 + 1));
 
-					if (xdi.constants.cs_value === predicate.string()) {
+					if (xdi.constants.cs_literal === predicate.string()) {
 
 						var object = JSON.parse(string.substring(split0 + split1 + 2));
 
