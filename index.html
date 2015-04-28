@@ -143,7 +143,7 @@ function discover1() {
 			alert(errorText);
 		},
 		serviceTypes ? serviceTypes.split(" ") : [],
-		"https://xdidiscoveryservice.xdi.net/"
+		"https://discovery.xdi2.org/neustar-discovery-service-prod"
 	);
 }
 
@@ -167,7 +167,7 @@ function discover2() {
 			alert(errorText);
 		},
 		serviceTypes ? serviceTypes.split(" ") : [],
-		"https://xdidiscoveryserviceote.xdi.net/"
+		"https://discovery.xdi2.org/neustar-discovery-service-ote"
 	);
 }
 
@@ -262,7 +262,7 @@ g.statement("(=x/#y)=a/#b/=c");
 
 <div id="tabs-6">
 <p><input type="text" id="discoveryinput" size="50" value='=alice'>&nbsp;cloud name / cloud number</p>
-<p><input type="text" id="discoveryinput2" size="50" value='<$https><$connect><$xdi>'>&nbsp;services</p>
+<p><input type="text" id="discoveryinput2" size="50" value=''>&nbsp;services</p>
 <button onclick="discover1();">From PROD</button>
 <button onclick="discover2();">From OTE</button>
 <button onclick="discoveryclear();">Clear</button>

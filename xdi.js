@@ -957,7 +957,7 @@
 				xri_uri: '<$uri>',
 				xri_xdi_uri: '<$xdi><$uri>',
 				xri_error: '<$false>',
-				uri_default_discovery_endpoint: 'https://xdidiscoveryservice.xdi.net/',
+				uri_default_discovery_endpoint: 'https://discovery.xdi2.org/neustar-discovery-service-prod',
 				arctypes: {
 					ROOT: 'root',
 					ENTITY: 'entity',
