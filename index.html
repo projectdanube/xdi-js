@@ -206,7 +206,7 @@ $(function() {
 </div>
 
 <div id="tabs-2">
-<input type="text" id="syntaxinput" size="50" value='[=]!1111[#address]!1<#street>&/&/"MyStreet123"'>
+<input type="text" id="syntaxinput" size="50" value='[=]!1111[#address]!1<#street>/&/"MyStreet123"'>
 <button onclick="syntax();">Syntax</button>
 <button onclick="syntaxclear();">Clear</button>
 <div class="result" id="syntaxresult"></div>
@@ -215,11 +215,11 @@ $(function() {
 <div id="tabs-3">
 <textarea id="graphinput" cols="120" rows="8">
 var g = xdi.graph();
-g.root().context("=markus", true).context("<#email>", true).context("&", true).literal("markus.sabadello@gmail.com");
+g.root().context("=markus", true).context("<#email>", true).literal("markus.sabadello@gmail.com");
 g.root().context("=markus", true).relation("#friend", "=joe", true);
 g.root().context("=markus", true).relation("#friend", "=drummond", true);
-g.root().context("=markus", true).context("<#first>", true).context("<#name>", true).context("&", true).literal("Markus");
-g.statement("=markus<#last><#name>&/&/\"Sabadello\"");
+g.root().context("=markus", true).context("<#first>", true).context("<#name>", true).literal("Markus");
+g.statement("=markus<#last><#name>/&/\"Sabadello\"");
 g.statement("(=x/#y)=a/#b/=c");
 </textarea>
 <button onclick="graph();">Graph</button>
@@ -233,9 +233,9 @@ g.statement("(=x/#y)=a/#b/=c");
 (=x/#y)=a/#b/=c
 =markus/#friend/=drummond
 =markus/#friend/=joe
-=markus<#email>&/&/"markus.sabadello@gmail.com"
-=markus<#first><#name>&/&/"Markus"
-=markus<#last><#name>&/&/"Sabadello"
+=markus<#email>/&/"markus.sabadello@gmail.com"
+=markus<#first><#name>/&/"Markus"
+=markus<#last><#name>/&/"Sabadello"
 </textarea>
 <button onclick="convert1();">XDI DISPLAY -> XDI JSON</button>
 <button onclick="convert2();">XDI JSON -> XDI DISPLAY</button>
