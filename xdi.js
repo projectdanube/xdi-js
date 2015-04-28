@@ -77,7 +77,7 @@
 
 	Statement.prototype.isContextNodeStatement = function() {
 
-		return this.predicate().string() === xdi.constants.xri_context;
+		return this.predicate().string() === xdi.constants.string_context;
 	};
 
 	Statement.prototype.isRelationStatement = function() {
@@ -119,9 +119,9 @@
 		return this._subsegments.length;
 	};
 
-	function Subsegment(string, cs, variable, definition, collection, attribute, literal, xref) {
+	function Subsegment(string, cs, variable, definition, collection, attribute, immutable, relative, literal, xref) {
 
-		if (! (this instanceof Subsegment)) return new Subsegment(string, cs, variable, definition, collection, attribute, literal, xref);
+		if (! (this instanceof Subsegment)) return new Subsegment(string, cs, variable, definition, collection, attribute, immutable, relative, literal, xref);
 
 		this._string = string;
 		this._cs = cs;
@@ -129,17 +129,21 @@
 		this._definition = definition;
 		this._collection = collection;
 		this._attribute = attribute;
+		this._immutable = immutable;
+		this._relative = relative;
 		this._literal = literal;
 		this._xref = xref;
 
 		if (this._string === null) {
 
 			this._string = '';
-			if (this._cs !== null) this._string += this._cs;
 			if (this._variable) this._string += xdi.constants.xs_variable.charAt(0);
 			if (this._definition) this._string += xdi.constants.xs_definition.charAt(0);
 			if (this._collection) this._string += xdi.constants.xs_collection.charAt(0);
 			if (this._attribute) this._string += xdi.constants.xs_attribute.charAt(0);
+			if (this._cs !== null) this._string += this._cs;
+			if (this._immutable !== null) this._string += this._immutable;
+			if (this._relative !== null) this._string += this._relative;
 			if (this._literal !== null) this._string += this._literal;
 			if (this._xref !== null) this._string += this._xref._string;
 			if (this._attribute) this._string += xdi.constants.xs_attribute.charAt(1);
@@ -177,6 +181,16 @@
 	Subsegment.prototype.attribute = function() {
 
 		return this._attribute;
+	};
+
+	Subsegment.prototype.immutable = function() {
+
+		return this._immutable;
+	};
+
+	Subsegment.prototype.relative = function() {
+
+		return this._relative;
 	};
 
 	Subsegment.prototype.literal = function() {
@@ -709,7 +723,7 @@
 
 		if (typeof sender === 'undefined') sender = xdi.constants.xri_anon;
 
-		var context = this._graph.root().context(sender, true).context('[' + xdi.constants.xri_msg + ']', true).context('!:uuid:' + xdi.util.guid(), true);
+		var context = this._graph.root().context(sender, true).context('[' + xdi.constants.xri_msg + ']', true).context('*!:uuid:' + xdi.util.guid(), true);
 		var message = new Message(context, this);
 
 		this._messages.push(message);
@@ -930,22 +944,24 @@
 
 				cs_authority_personal: '=',
 				cs_authority_legal: '+',
-				cs_authority_general: '*',
-				cs_class_unreserved: '#',
 				cs_class_reserved: '$',
+				cs_class_unreserved: '#',
+				cs_instance_ordered: '@',
+				cs_instance_unordered: '*',
 				cs_literal: '&',
-				cs_member_unordered: '!',
-				cs_member_ordered: '@',
-				cs_array: [ '=', '+', '*', '#', '$', '&', '!', '@' ],
+				cs_array: [ '=', '+', '$', '#', '@', '*', '&' ],
+				s_immutable: '!',
+				s_relative: '_',
 				xs_root: '()',
 				xs_variable: '{}',
 				xs_definition: '||',
 				xs_collection: '[]',
 				xs_attribute: '<>',
 				xri_root: '',
-				xri_context: '',
+				string_context: '',
 				xri_literal: '&',
-				xri_variable: '{}',
+				xri_common_variable: '{}',
+				xri_common_definition: '||',
 				xri_anon: '$anon',
 				xri_public: '$public',
 				xri_msg: '$msg',
@@ -1223,6 +1239,8 @@
 						if (pos < string.length && (pair = xdi.parser.xscollection(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
 						if (pos < string.length && (pair = xdi.parser.xsattribute(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
 						if (pos < string.length && xdi.parser.cs(string.charAt(pos)) !== null) pos++;
+						if (pos < string.length && xdi.parser.immutable(string.charAt(pos))) pos++;
+						if (pos < string.length && xdi.parser.relative(string.charAt(pos))) pos++;
 						if (pos < string.length && (pair = xdi.parser.xsxref(string.charAt(pos))) !== null) { pairs.push(pair); pos++; }
 
 						// parse to the end of the subsegment
@@ -1240,6 +1258,8 @@
 								if (xdi.parser.xscollection(string.charAt(pos)) !== null) break;
 								if (xdi.parser.xsattribute(string.charAt(pos)) !== null) break;
 								if (xdi.parser.cs(string.charAt(pos)) !== null) break;
+								if (xdi.parser.immutable(string.charAt(pos))) break;
+								// intentionally don't check for relative here, since it's a valid character
 								if (xdi.parser.xsxref(string.charAt(pos)) !== null) break;
 							}
 
@@ -1293,6 +1313,8 @@
 					var definition = null;
 					var collection = null;
 					var attribute = null;
+					var immutable = false;
+					var relative = false;
 					var literal = null;
 					var xref = null;
 
@@ -1339,6 +1361,20 @@
 						pos++;
 					}
 
+					// extract immutable
+
+					if (pos < len && (immutable = xdi.parser.immutable(string.charAt(pos)))) {
+
+						pos++;
+					}
+
+					// extract relative
+
+					if (pos < len && (relative = xdi.parser.relative(string.charAt(pos)))) {
+
+						pos++;
+					}
+
 					// parse the rest, either xref or literal
 
 					if (pos < len) {
@@ -1355,7 +1391,7 @@
 
 					// done
 
-					return new Subsegment(string, cs, variable !== null, definition !== null, collection !== null, attribute !== null, literal, xref);
+					return new Subsegment(string, cs, variable !== null, definition !== null, collection !== null, attribute !== null, immutable, relative, literal, xref);
 				},
 
 				parseXref: function(string) {
@@ -1480,19 +1516,25 @@
 					var indexColon = string.indexOf(':');
 					var indexAuthorityPersonal = string.indexOf(xdi.constants.cs_authority_personal);
 					var indexAuthorityLegal = string.indexOf(xdi.constants.cs_authority_legal);
-					var indexAuthorityGeneral = string.indexOf(xdi.constants.cs_authority_general);
-					var indexClassUnreserved = string.indexOf(xdi.constants.cs_class_unreserved);
 					var indexClassReserved = string.indexOf(xdi.constants.cs_class_reserved);
-					var indexMemberUnordered = string.indexOf(xdi.constants.cs_member_unordered);
+					var indexClassUnreserved = string.indexOf(xdi.constants.cs_class_unreserved);
+					var indexMemberOrdered = string.indexOf(xdi.constants.cs_instance_ordered);
+					var indexMemberUnordered = string.indexOf(xdi.constants.cs_instance_unordered);
+					var indexLiteral = string.indexOf(xdi.constants.cs_literal);
+					var indexImmutable = string.indexOf(xdi.constants.s_immutable);
+					var indexRelative = string.indexOf(xdi.constants.s_relative);
 
 					if (indexColon === -1) return false;
 
 					if (indexAuthorityPersonal !== -1 && indexAuthorityPersonal < indexColon) return false;
 					if (indexAuthorityLegal !== -1 && indexAuthorityLegal < indexColon) return false;
-					if (indexAuthorityGeneral !== -1 && indexAuthorityGeneral < indexColon) return false;
-					if (indexClassUnreserved !== -1 && indexClassUnreserved < indexColon) return false;
 					if (indexClassReserved !== -1 && indexClassReserved < indexColon) return false;
+					if (indexClassUnreserved !== -1 && indexClassUnreserved < indexColon) return false;
+					if (indexMemberOrdered !== -1 && indexMemberOrdered < indexColon) return false;
 					if (indexMemberUnordered !== -1 && indexMemberUnordered < indexColon) return false;
+					if (indexLiteral !== -1 && indexLiteral < indexColon) return false;
+					if (indexImmutable !== -1 && indexImmutable < indexColon) return false;
+					if (indexRelative !== -1 && indexRelative < indexColon) return false;
 
 					return true;
 				},
