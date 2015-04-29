@@ -978,7 +978,7 @@
 					ROOT: 'root',
 					ENTITY: 'entity',
 					ATTRIBUTE: 'attribute',
-					VALUE: 'value'
+					LITERAL: 'literal'
 				}
 			},
 
@@ -1150,11 +1150,13 @@
 					else if (object instanceof Subsegment)
 						arcString = object.string();
 					else arcString = object;
-					
+
+					try { JSON.parse(arcString); return xdi.constants.arctypes.LITERAL; } catch(e) {}
+
 					if ((arcString === "") || (arcString.match(/^\(.*\)$/) !== null))
 						return xdi.constants.arctypes.ROOT;
-					else if (arcString.slice(-1) === "&")
-						return xdi.constants.arctypes.VALUE;
+					else if (arcString === "&")
+						return xdi.constants.arctypes.LITERAL;
 					else if (arcString.match(/^<.*>$/) !== null)
 						return xdi.constants.arctypes.ATTRIBUTE;
 					else
