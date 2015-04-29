@@ -1475,6 +1475,16 @@
 					return null;
 				},
 
+				immutable: function(char) {
+
+					return xdi.constants.s_immutable === char;
+				},
+
+				relative: function(char) {
+
+					return xdi.constants.s_relative === char;
+				},
+
 				xsxref: function(char) {
 
 					if (xdi.constants.xs_root.charAt(0) === char) return xdi.constants.xs_root;
