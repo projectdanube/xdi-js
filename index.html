@@ -143,7 +143,7 @@ function discover1() {
 			alert(errorText);
 		},
 		serviceTypes ? serviceTypes.split(" ") : [],
-		"https://xdidiscoveryservice.xdi.net/"
+		"https://discovery.xdi2.org/neustar-discovery-service-prod"
 	);
 }
 
@@ -167,7 +167,7 @@ function discover2() {
 			alert(errorText);
 		},
 		serviceTypes ? serviceTypes.split(" ") : [],
-		"https://xdidiscoveryserviceote.xdi.net/"
+		"https://discovery.xdi2.org/neustar-discovery-service-ote"
 	);
 }
 
@@ -206,7 +206,7 @@ $(function() {
 </div>
 
 <div id="tabs-2">
-<input type="text" id="syntaxinput" size="50" value='[=]!1111[#address]!1<#street>&/&/"MyStreet123"'>
+<input type="text" id="syntaxinput" size="50" value='=!1111[#address]!1<#street>/&/"MyStreet123"'>
 <button onclick="syntax();">Syntax</button>
 <button onclick="syntaxclear();">Clear</button>
 <div class="result" id="syntaxresult"></div>
@@ -215,11 +215,11 @@ $(function() {
 <div id="tabs-3">
 <textarea id="graphinput" cols="120" rows="8">
 var g = xdi.graph();
-g.root().context("=markus", true).context("<#email>", true).context("&", true).literal("markus.sabadello@gmail.com");
+g.root().context("=markus", true).context("<#email>", true).literal("markus.sabadello@gmail.com");
 g.root().context("=markus", true).relation("#friend", "=joe", true);
 g.root().context("=markus", true).relation("#friend", "=drummond", true);
-g.root().context("=markus", true).context("<#first>", true).context("<#name>", true).context("&", true).literal("Markus");
-g.statement("=markus<#last><#name>&/&/\"Sabadello\"");
+g.root().context("=markus", true).context("<#first>", true).context("<#name>", true).literal("Markus");
+g.statement("=markus<#last><#name>/&/\"Sabadello\"");
 g.statement("(=x/#y)=a/#b/=c");
 </textarea>
 <button onclick="graph();">Graph</button>
@@ -233,9 +233,9 @@ g.statement("(=x/#y)=a/#b/=c");
 (=x/#y)=a/#b/=c
 =markus/#friend/=drummond
 =markus/#friend/=joe
-=markus<#email>&/&/"markus.sabadello@gmail.com"
-=markus<#first><#name>&/&/"Markus"
-=markus<#last><#name>&/&/"Sabadello"
+=markus<#email>/&/"markus.sabadello@gmail.com"
+=markus<#first><#name>/&/"Markus"
+=markus<#last><#name>/&/"Sabadello"
 </textarea>
 <button onclick="convert1();">XDI DISPLAY -> XDI JSON</button>
 <button onclick="convert2();">XDI JSON -> XDI DISPLAY</button>
@@ -245,16 +245,16 @@ g.statement("(=x/#y)=a/#b/=c");
 
 <div id="tabs-5">
 <p><input type="text" id="clientinput" size="50" value='https://server.xdi2.org/xdi/=alice'>&nbsp;xdi endpoint</p>
-<p><input type="text" id="clientinput2" size="50" value='([=]!:uuid:1111)'>&nbsp;recipient peer root</p>
+<p><input type="text" id="clientinput2" size="50" value='(=!:uuid:1111)'>&nbsp;recipient peer root</p>
 <p><input type="text" id="clientinput3" size="50" value='$anon'>&nbsp;sender</p>
-<p><input type="text" id="clientinput4" size="50" value='([=]!:uuid:1111/$public)$do'>&nbsp;link contract</p>
+<p><input type="text" id="clientinput4" size="50" value='(=!:uuid:1111/$public)$do'>&nbsp;link contract</p>
 <p><input type="text" id="clientinput5" size="70" value=''>&nbsp;secret token</p>
 <p>
 <input type="radio" name="clientinput6" value="$get" checked>&nbsp;$get
 <input type="radio" name="clientinput6" value="$set">&nbsp;$set
 <input type="radio" name="clientinput6" value="$del">&nbsp;$del
 </p>
-<p><input type="text" id="clientinput7" size="70" value='[=]!:uuid:1111$msg$sig$keypair<$public><$key>'>&nbsp;target address or statement</p>
+<p><input type="text" id="clientinput7" size="70" value='=!:uuid:1111$msg$sig$keypair<$public><$key>'>&nbsp;target address or statement</p>
 <button onclick="client();">Send</button>
 <button onclick="clientclear();">Clear</button>
 <div class="result" id="clientresult"></div>
@@ -262,7 +262,7 @@ g.statement("(=x/#y)=a/#b/=c");
 
 <div id="tabs-6">
 <p><input type="text" id="discoveryinput" size="50" value='=alice'>&nbsp;cloud name / cloud number</p>
-<p><input type="text" id="discoveryinput2" size="50" value='<$https><$connect><$xdi>'>&nbsp;services</p>
+<p><input type="text" id="discoveryinput2" size="50" value=''>&nbsp;services</p>
 <button onclick="discover1();">From PROD</button>
 <button onclick="discover2();">From OTE</button>
 <button onclick="discoveryclear();">Clear</button>
