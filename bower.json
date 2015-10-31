@@ -1,6 +1,6 @@
 {
   "name": "xdi",
-  "version": "0.4-SNAPSHOT",
+  "version": "0.5-SNAPSHOT",
   "homepage": "http://js.xdi2.org/",
   "description": "xdi.js is an XDI client library for JavaScript, intended to be used by browser-based applications to communicate with XDI servers.",
   "main": "xdi.js",
