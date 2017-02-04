@@ -760,12 +760,12 @@
 
 		if (typeof toAddress === 'undefined') {
 
-			var relation = this._context.relation(xdi.constants_xri_is_context);
+			var relation = this._context.relation(xdi.constants_xri_to);
 
 			return relation === null ? null : relation.target;
 		}
 
-		this._context.relation(xdi.constants.xri_is_context, toAddress, true);
+		this._context.relation(xdi.constants.xri_to, toAddress, true);
 
 		return this;
 	};
@@ -965,7 +965,7 @@
 				xri_anon: '$anon',
 				xri_public: '$public',
 				xri_msg: '$msg',
-				xri_is_context: '$is()',
+				xri_to: '$to',
 				xri_ref: '$ref',
 				xri_rep: '$rep',
 				xri_secret_token: '<$secret><$token>',
